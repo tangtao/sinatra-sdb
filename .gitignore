@@ -1,0 +1,6 @@
+.bundle
+storage/*
+log/*
+s3.yml
+*.pid
+db/*.sqlite

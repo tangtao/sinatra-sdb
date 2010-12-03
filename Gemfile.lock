@@ -1,0 +1,86 @@
+GIT
+  remote: git://github.com/thoughtbot/factory_girl.git
+  revision: 2d1c77984b365dabb43b7571eaa77f626ef65abc
+  specs:
+    factory_girl (2.0.0.beta1)
+
+PATH
+  remote: /home/tangtao/m/www/lib/database_cleaner
+  specs:
+    database_cleaner (0.6.1)
+
+GEM
+  remote: http://rubygems.org/
+  specs:
+    activemodel (3.0.3)
+      activesupport (= 3.0.3)
+      builder (~> 2.1.2)
+      i18n (~> 0.4)
+    activerecord (3.0.3)
+      activemodel (= 3.0.3)
+      activesupport (= 3.0.3)
+      arel (~> 2.0.2)
+      tzinfo (~> 0.3.23)
+    activesupport (3.0.3)
+    arel (2.0.4)
+    backports (1.18.2)
+    builder (2.1.2)
+    dhaka (2.2.1)
+    diff-lcs (1.1.2)
+    i18n (0.5.0)
+    monkey-lib (0.5.4)
+      backports
+    mysql2 (0.2.6)
+    nokogiri (1.4.4)
+    rack (1.2.1)
+    rack-test (0.5.6)
+      rack (>= 1.0)
+    right_aws (2.0.0)
+      right_http_connection (>= 1.2.1)
+    right_http_connection (1.2.4)
+    rspec (2.2.0)
+      rspec-core (~> 2.2)
+      rspec-expectations (~> 2.2)
+      rspec-mocks (~> 2.2)
+    rspec-core (2.2.1)
+    rspec-expectations (2.2.0)
+      diff-lcs (~> 1.1.2)
+    rspec-mocks (2.2.0)
+    sinatra (1.1.0)
+      rack (~> 1.1)
+      tilt (~> 1.1)
+    sinatra-advanced-routes (0.5.1)
+      monkey-lib (~> 0.5.0)
+      sinatra (~> 1.0)
+      sinatra-sugar (~> 0.5.0)
+    sinatra-reloader (0.5.0)
+      sinatra (~> 1.0)
+      sinatra-advanced-routes (~> 0.5.0)
+    sinatra-sugar (0.5.0)
+      monkey-lib (~> 0.5.0)
+      sinatra (~> 1.0)
+    spork (0.8.4)
+    sqlite3-ruby (1.3.2)
+    tilt (1.1)
+    tzinfo (0.3.23)
+    uuidtools (2.1.1)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  activerecord (>= 3.0.0)
+  builder
+  database_cleaner!
+  dhaka
+  factory_girl!
+  mysql2
+  nokogiri
+  rack-test
+  right_aws
+  rspec
+  sinatra
+  sinatra-reloader
+  spork
+  sqlite3-ruby
+  uuidtools

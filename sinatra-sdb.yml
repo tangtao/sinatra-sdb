@@ -1,0 +1,22 @@
+:development:
+  :public_path: public
+  :db:
+    :database: sdb_dev
+    :adapter: mysql2
+    :encoding: utf8
+    :pool: 5
+    :username: rails
+    :password: rails
+    :socket: /var/run/mysqld/mysqld.sock 
+
+:test:
+  :public_path: public
+  :db:
+    :database: db/test.sqlite
+    :adapter: sqlite3
+
+:production:
+  :public_path: public
+  :db:
+    :database: db/production.sqlite
+    :adapter: sqlite3
