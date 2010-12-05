@@ -1,17 +1,17 @@
-require 'rubygems'
-require 'spork'
+#require 'rubygems'
+#require 'spork'
 
-Spork.prefork do
+#Spork.prefork do
   # Loading more in this block will cause your tests to run faster. However, 
   # if you change any configuration or code from libraries loaded here, you'll
   # need to restart spork for it take effect.
   
-end
+#end
 
-Spork.each_run do
+#Spork.each_run do
   # This code will be run each time you run your specs.
   
-end
+#end
 
 # --- Instructions ---
 # - Sort through your spec_helper file. Place as much environment loading 
@@ -40,7 +40,10 @@ FactoryGirl.find_definitions
 #require 'spec/autorun'
 #require 'spec/interop/test'
 
-require 'helper/right_sdb_interface_ext'
+#require 'helper/right_sdb_interface_ext'
+require 'database_cleaner'
+
+Dir["#{File.dirname(__FILE__)}/helper/*.rb"].each {|r| require r }
 
 # set test environment
 set :environment, :test

@@ -1,10 +1,6 @@
 #
-# Copyright (c) 2008 RightScale Inc
+# extend RightAws and make link only.
 #
-# 
-#
-
-#require "right_aws"
 
 module RightAws
 

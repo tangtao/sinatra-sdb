@@ -4,11 +4,6 @@ GIT
   specs:
     factory_girl (2.0.0.beta1)
 
-PATH
-  remote: /home/tangtao/m/www/lib/database_cleaner
-  specs:
-    database_cleaner (0.6.1)
-
 GEM
   remote: http://rubygems.org/
   specs:
@@ -25,6 +20,7 @@ GEM
     arel (2.0.4)
     backports (1.18.2)
     builder (2.1.2)
+    database_cleaner (0.6.0)
     dhaka (2.2.1)
     diff-lcs (1.1.2)
     i18n (0.5.0)
@@ -71,7 +67,7 @@ PLATFORMS
 DEPENDENCIES
   activerecord (>= 3.0.0)
   builder
-  database_cleaner!
+  database_cleaner
   dhaka
   factory_girl!
   mysql2
