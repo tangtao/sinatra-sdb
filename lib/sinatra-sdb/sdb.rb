@@ -10,7 +10,7 @@ require 'sinatra/base'
 require 'openssl'
 require 'base64'
 require 'digest/sha1'
-require 'md5'
+require 'digest/md5'
 require 'pp'
 
 module SDB

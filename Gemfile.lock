@@ -1,8 +1,7 @@
-GIT
-  remote: git://github.com/thoughtbot/factory_girl.git
-  revision: 2d1c77984b365dabb43b7571eaa77f626ef65abc
+PATH
+  remote: /home/tangtao/m/www/lib/dhaka
   specs:
-    factory_girl (2.0.0.beta1)
+    dhaka (2.2.1)
 
 GEM
   remote: http://rubygems.org/
@@ -21,12 +20,12 @@ GEM
     backports (1.18.2)
     builder (2.1.2)
     database_cleaner (0.6.0)
-    dhaka (2.2.1)
     diff-lcs (1.1.2)
     i18n (0.5.0)
+    machinist (2.0.0.beta2)
     monkey-lib (0.5.4)
       backports
-    mysql2 (0.2.6)
+    mysql (2.8.1)
     nokogiri (1.4.4)
     rack (1.2.1)
     rack-test (0.5.6)
@@ -68,9 +67,9 @@ DEPENDENCIES
   activerecord (>= 3.0.0)
   builder
   database_cleaner
-  dhaka
-  factory_girl!
-  mysql2
+  dhaka!
+  machinist (>= 2.0.0.beta2)
+  mysql
   nokogiri
   rack-test
   right_aws

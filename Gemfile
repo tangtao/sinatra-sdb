@@ -6,15 +6,13 @@ gem 'sinatra-reloader'
 gem 'activerecord', '>= 3.0.0'
 
 gem 'builder'
-gem 'mysql2'
+gem 'mysql'
 gem 'uuidtools'
-gem 'dhaka'
+gem 'dhaka', :path => File.join(File.dirname(__FILE__), '..', 'lib', 'dhaka')
 gem 'sqlite3-ruby'
 gem 'rack-test'
 gem 'rspec'
-#gem 'machinist', '>= 2.0.0.beta2'
-#gem 'factory_girl'
-gem 'factory_girl', :git => 'git://github.com/thoughtbot/factory_girl.git'
+gem 'machinist', '>= 2.0.0.beta2'
 gem 'right_aws'
 #gem 'right_aws', :path => File.join(File.dirname(__FILE__), '..', 'lib', 'right_aws')
 gem 'database_cleaner'

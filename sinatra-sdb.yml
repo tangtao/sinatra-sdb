@@ -2,7 +2,7 @@
   :public_path: public
   :db:
     :database: sdb_dev
-    :adapter: mysql2
+    :adapter: mysql
     :encoding: utf8
     :pool: 5
     :username: rails

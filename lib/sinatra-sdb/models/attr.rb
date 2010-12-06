@@ -1,4 +1,3 @@
-require 'md5'
 class Attr < ActiveRecord::Base
 
   belongs_to :item
@@ -9,9 +8,8 @@ class Attr < ActiveRecord::Base
   
   def md5
     unless self.content.blank?
-        self.md5sum = MD5.hexdigest(self.content)
+        self.md5sum = Digest::MD5.hexdigest(self.content)
     end
   end
-  
 
 end
