@@ -3,15 +3,14 @@ require File.dirname(__FILE__) + '/spec_helper'
 describe "DomainMetadata Action" do
   
   before(:each) do
-    @user = User.make!
   end
   
   describe "All" do
     
     it "Success" do
       domain = Domain.make!
-      ux = domain.user
-      sdb = getSdb(ux)
+      u = domain.user
+      sdb = getSdb(u)
       link = sdb.domain_metadata_link(domain.name)
       
       get link
