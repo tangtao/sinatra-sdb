@@ -54,9 +54,7 @@ module SDB
     end
     
     def find_secret_by_access_key(key)
-      u = User.find_by_key(key)
-      raise ServiceError.new("AuthMissingFailure") unless u
-      u.secret
+      @storage.FindSecretByAccessKey(key)
     end
 
     def filterAttrs(params)

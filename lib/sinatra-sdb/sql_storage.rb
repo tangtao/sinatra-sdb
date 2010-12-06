@@ -5,10 +5,12 @@ module SDB
         @query_executor = QueryExecutor.new
       end
 
-      def findUserByAccessKey(key)
-        User.find_by_key(key)
+      def FindSecretByAccessKey(key)
+        u = User.find_by_key(key)
+        raise ServiceError.new("AuthMissingFailure") unless u
+        u.secret
       end
-    
+
       def CreateDomain(args)
         u = findUserByAccessKey(args[:key])
         d = Domain.find_or_create_by_user_id_and_name(u.id, args[:domainName])
@@ -106,6 +108,9 @@ module SDB
       end
       
       private
+      def findUserByAccessKey(key)
+        User.find_by_key(key)
+      end
 
       def updateItemAttrs(domain, itemName, attributes)
         i = domain.items.find_by_name(itemName)
