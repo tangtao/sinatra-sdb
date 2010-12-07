@@ -54,13 +54,15 @@ module SDB
     end
     
     def find_secret_by_access_key(key)
-      @storage.FindSecretByAccessKey(key)
+      u = User.find_by_key(key)
+      raise ServiceError.new("AuthMissingFailure") unless u
+      u.secret
     end
 
     def filterAttrs(params)
       result = {}
       params.each do |k,v|
-          result[k] = v if k =~ /\.\d+\./  #match like "xxxx.1.xxxx"
+          result[k] = v if k =~ /\.\d+/  #match like "xxxx.1"
       end
       result
     end

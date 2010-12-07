@@ -61,7 +61,9 @@ module SDB
       end
 
       def QueryWithAttributes(params)
-        Query(params)
+        result = Query(params)
+        result[:attributeNames] = readAttrNames2Array(params)
+        result
       end
       
       private
@@ -75,7 +77,7 @@ module SDB
           a[:replace] = true if params["Attribute.#{x}.Replace"] == "true"
           result.push(a)
           
-          x+=1
+          x += 1
         end
         result
       end
@@ -96,6 +98,16 @@ module SDB
           end
           result << [params["Item.#{y}.ItemName"], item_attrs]
           y += 1
+        end
+        result
+      end
+
+      def readAttrNames2Array(params)
+        result = []
+        x = 1
+        while params["AttributeName.#{x}"]
+          result << params["AttributeName.#{x}"]
+          x += 1
         end
         result
       end

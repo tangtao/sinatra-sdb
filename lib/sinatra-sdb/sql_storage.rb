@@ -94,13 +94,16 @@ module SDB
       def QueryWithAttributes(args)#(key, domainName, queryExpression)
         u = findUserByAccessKey(args[:key])
         d = u.domains.find_by_name(args[:domainName])
+        attr_names = args[:attributeNames]
 
         items,count = @query_executor.do_query(args[:queryExpression], d)
         result = []
         items.each do |item|
           ats = []
           item.attrs.each do |a|
-            ats << {:name => a.name, :value => a.content}
+            if attr_names.include?(a.name)
+              ats << {:name => a.name, :value => a.content}
+            end
           end
           result << [item.name, ats]
         end
