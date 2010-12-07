@@ -82,8 +82,9 @@ module SDB
 
       def readBatchAttrs2Array(params)
         result = []
-        x = y = 0
+        y = 0
         while params["Item.#{y}.ItemName"]
+          x = 0
           item_attrs = []
           while params["Item.#{y}.Attribute.#{x}.Name"]
             a = {:name => params["Item.#{y}.Attribute.#{x}.Name"],
