@@ -13,7 +13,7 @@ module SDB
       ActiveRecord::Base.establish_connection(SDB.config[:db])
     end
 
-    configure(:development) do
+    configure(:development, :test) do
       register Sinatra::Reloader
       also_reload "./lib/**/*.rb"
     end

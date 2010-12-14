@@ -5,15 +5,29 @@ describe "Select Parser Test" do
   
   describe "SelectGrammar" do
     before(:each) do
+      logger           = Logger.new(STDOUT)
+      logger.level     = Logger::ERROR
+
       @lexer = Dhaka::Lexer.new(SDB::SelectLexerSpec)
-      @parser = Dhaka::Parser.new(SDB::SelectGrammar)
+      @parser = Dhaka::Parser.new(SDB::SelectGrammar, logger)
     end
     
-    it "Simple query" do
-      query = "select * from bookmark_0001 where (attr = v_0001)"
-      parse_result = @parser.parse(@lexer.lex(query))
-      pp parse_result
+    it "query with simple where" do
+      checkSQLparser("select * from book where a = v1")
     end
+    it "query with logic where" do
+      checkSQLparser("select * from book where (a1 = v1 or a3 = v3) and (a2 = v2 or a4 = v4)")
+    end
+    it "query with sort" do
+      checkSQLparser("select * from bookmark_0001 order by xxx limit zzz")
+      checkSQLparser("select * from bookmark_0001 order by xxx")
+    end
+    
+    def checkSQLparser(query_string)
+      parse_result = @parser.parse(@lexer.lex(query_string))
+      parse_result.class.should == Dhaka::ParseSuccessResult
+    end
+
 
   end
 
@@ -47,7 +61,7 @@ describe "Select Parser Test" do
       end
     end
 
-    describe "Simple Conditions" do
+    describe "Simple Predicate" do
       it "one item, one attr" do
         query = "select * from #{@domain.name} where (#{@attr1.name} = #{@attr1.content})"
         result = @selexecutor.do_query(query, @user)
@@ -61,6 +75,77 @@ describe "Select Parser Test" do
         result = @selexecutor.do_query(query, @user).to_a
         result.count.should == 1
         result[0].name.should == item2.name
+      end
+  
+    end
+
+    describe "Composite Predicates" do
+      before(:each) do
+        @item2 = Item.make!(:domain => @domain)
+        @attr2 = Attr.make!(:item => @item2)
+      end
+
+      it "AND expr" do
+        query = "select * from #{@domain.name} where (#{@attr1.name} = " +
+                "#{@attr1.content}) and (#{@attr2.name} = #{@attr2.content})"
+        result = @selexecutor.do_query(query, @user).to_a
+        result.count.should == 0
+      end
+
+      it "OR expr" do
+        query = "select * from #{@domain.name} where (#{@attr1.name} = " +
+                "#{@attr1.content}) or (#{@attr2.name} = #{@attr2.content})"
+        result = @selexecutor.do_query(query, @user).to_a
+        result.count.should == 2
+      end
+
+      it "NOT expr" do
+        query = "select * from #{@domain.name} where not (#{@attr1.name} = #{@attr1.content})"
+        result = @selexecutor.do_query(query, @user).to_a
+        result.count.should == 1
+        result[0].name.should == @item2.name
+      end
+  
+    end
+
+    describe "Intersection Predicate" do
+      before(:each) do
+        @item2 = Item.make!(:domain => @domain)
+        @attr2_1 = Attr.make!(:item => @item2)
+        @attr2_2 = Attr.make!(:item => @item2)
+        
+        @item3 = Item.make!(:domain => @domain)
+        @attr3_1 = Attr.make!(:item => @item3, :name => @attr2_1.name, :content => @attr2_1.content)
+        @attr3_2 = Attr.make!(:item => @item3)
+      end
+
+
+      it "No.1" do
+        query = "select * from #{@domain.name} where (#{@attr2_1.name} = " +
+                "#{@attr2_1.content}) intersection (#{@attr3_2.name} = #{@attr3_2.content})"
+        result = @selexecutor.do_query(query, @user).to_a
+        result.count.should == 1
+      end
+  
+    end
+
+    describe "Sort Condition" do
+      before(:each) do
+        @item2 = Item.make!(:domain => @domain)
+        @attr2_1 = Attr.make!(:item => @item2)
+        @attr2_2 = Attr.make!(:item => @item2)
+        
+        @item3 = Item.make!(:domain => @domain)
+        @attr3_1 = Attr.make!(:item => @item3, :name => @attr2_1.name, :content => @attr2_1.content)
+        @attr3_2 = Attr.make!(:item => @item3)
+      end
+
+
+      it "No.1" do
+        query = "select * from #{@domain.name} where #{@attr2_1.name} = #{@attr2_1.content} order by #{@attr2_1.name} "
+        result = @selexecutor.do_query(query, @user).to_a
+        result.count.should == 2
+        result[0].id.should > result[1].id
       end
   
     end

@@ -6,8 +6,10 @@ module SDB
     ERROR_MARKER = ">>>"
   
     def initialize
+      logger           = Logger.new(STDOUT)
+      logger.level     = Logger::ERROR
       @lexer = Dhaka::Lexer.new(SelectLexerSpec)
-      @parser = Dhaka::Parser.new(SelectGrammar)
+      @parser = Dhaka::Parser.new(SelectGrammar, logger)
     end
     
     # Execute the query
@@ -66,8 +68,24 @@ module SDB
     end
 
     for_symbol('select_expression') do
-      select_with_conditions %w| select output from domain where predicates |
+      select_with_conditions %w| select output from domain conditions |
       select_without_conditions %w| select output from domain |
+    end
+    
+    for_symbol('conditions') do
+      only_where      %w| where predicates |
+      with_where      %w| where predicates conditions2 |
+      without_where   %w| conditions2 |
+    end
+
+    for_symbol('conditions2') do
+      only_sort      %w| order by predicates2 |
+      with_sort      %w| order by predicates2 conditions3 |
+      without_sort   %w| conditions3 |
+    end
+
+    for_symbol('conditions3') do
+      with_limit     %w| limit predicates3 |
     end
 
     for_symbol('output') do
@@ -81,25 +99,24 @@ module SDB
     end
   
     for_symbol('predicates') do
-      single_predicate     %w| predicate |
-      not_predicate        %w| not predicate |
-      intersection         %w| predicate intersection predicates |
-      not_intersection     %w| not predicate intersection predicates |
-      union                %w| predicate union predicates |
-      not_union            %w| not predicate union predicates |
+      single_predicate          %w| predicate |
+      parenthetized_predicate   %w| ( predicates ) |
+      not_predicates            %w| not predicates |
+      intersection              %w| predicates intersection predicates |
+      and_predicates            %w| predicates and predicates |
+      or_predicates             %w| predicates or predicates |
+    end
+
+    for_symbol('predicates2') do
+      order_by_name          %w| identifier |
+    end
+
+    for_symbol('predicates3') do
+      limit_name          %w| identifier |
     end
     
     for_symbol('predicate') do
-      attribute_comparison %w| ( attribute_comparison ) |
-    end
-    
-    for_symbol('attribute_comparison') do
       single_comparison    %w| identifier comp_op constant |
-      not_comparison       %w| not identifier comp_op constant |
-      and_comparison       %w| identifier comp_op constant and attribute_comparison |
-      not_and_comparison   %w| not identifier comp_op constant and attribute_comparison |
-      or_comparison        %w| identifier comp_op constant or attribute_comparison |
-      not_or_comparison    %w| not identifier comp_op constant or attribute_comparison |
     end
     
     for_symbol('comp_op') do
@@ -147,7 +164,7 @@ module SDB
       # ignore whitespace
     end
     
-    KEYWORDS = %w| select all itemName count from where not and or intersection |
+    KEYWORDS = %w| select itemName count from where not and or intersection order by limit |
     KEYWORDS.each do |keyword|
       for_pattern(keyword) do
         create_token(keyword)
@@ -168,8 +185,7 @@ module SDB
     def initialize(user)
       @user = user
       @domain = nil
-      @predicate_identifier = nil
-      @all_items = nil
+      @sort_name = nil
     end
     
     define_evaluation_rules do
@@ -191,7 +207,8 @@ module SDB
       for_select_with_conditions do
         output_type = evaluate(child_nodes[1])
         @domain = evaluate(child_nodes[3])
-        items = evaluate(child_nodes[5])
+        items = evaluate(child_nodes[4])
+        items = items.sort {|b,a| a.id <=> b.id}
 
         case output_type
         when :all
@@ -202,17 +219,36 @@ module SDB
           items.count
         end
       end
+      
+      for_only_where do
+        evaluate(child_nodes[1])
+      end
+      for_with_where do
+        result = evaluate(child_nodes[1])
+        evaluate(child_nodes[2])
+        result
+      end
+      for_without_where do
+        evaluate(child_nodes[0])
+      end
 
+      for_only_sort do
+        @sort_name = evaluate(child_nodes[2])
+      end
+      for_with_sort do
+        evaluate(child_nodes[1])
+      end
+      for_without_sort do
+        evaluate(child_nodes[0])
+      end
+      
+      for_with_limit do
+        evaluate(child_nodes[1])
+      end
 
-      for_all_output do
-        :all
-      end
-      for_item_name_output do
-        :itemName
-      end
-      for_count_output do
-        :count
-      end
+      for_all_output {:all}
+      for_item_name_output {:itemName}
+      for_count_output {:count}
 
       for_one_domain do
         domain_name = evaluate(child_nodes[0])
@@ -222,63 +258,36 @@ module SDB
       for_single_predicate do
         evaluate(child_nodes[0])
       end
+
+      for_parenthetized_predicate do
+        evaluate(child_nodes[1])
+      end
       
-      for_not_predicate do
+      for_not_predicates do
         results = evaluate(child_nodes[1])
-        all_items.difference(results)
+        @domain.items.to_set.difference(results)
       end
       
       for_intersection do
-        results = evaluate(child_nodes[0])
-        results.intersection(evaluate(child_nodes[2]))
+        results1 = evaluate(child_nodes[0])
+        results2 = evaluate(child_nodes[2])
+        results1.intersection(results2)
       end
-      
-      # TODO Nots are probably not handled correctly. Need to play with AWS to find out for sure.
-      for_not_intersection do
-        results = evaluate(child_nodes[1])
-        all_items.difference(results.intersection(evaluate(child_nodes[3])))
+
+      for_and_predicates do
+        results1 = evaluate(child_nodes[0])
+        results2 = evaluate(child_nodes[2])
+        results1 & results2
       end
-      
-      for_union do
-        results = evaluate(child_nodes[0])
-        results.union(evaluate(child_nodes[2]))
-      end
-      
-      for_not_union do
-        results = evaluate(child_nodes[1])
-        all_items.difference(results.union(evaluate(child_nodes[3])))
-      end
-      
-      for_attribute_comparison do
-        evaluate(child_nodes[1])
+
+      for_or_predicates do
+        results1 = evaluate(child_nodes[0])
+        results2 = evaluate(child_nodes[2])
+        results1 | results2
       end
       
       for_single_comparison do
         do_comparison(evaluate(child_nodes[0]), evaluate(child_nodes[1]), evaluate(child_nodes[2]))
-      end
-      
-      for_not_comparison do
-        do_comparison(evaluate(child_nodes[1]), evaluate(child_nodes[2]), evaluate(child_nodes[3]), true)
-      end
-      
-      for_and_comparison do
-        results = do_comparison(evaluate(child_nodes[0]), evaluate(child_nodes[1]), evaluate(child_nodes[2]))
-        results.intersection(evaluate(child_nodes[4]))
-      end
-      
-      for_not_and_comparison do
-        results = do_comparison(evaluate(child_nodes[1]), evaluate(child_nodes[2]), evaluate(child_nodes[3]), true)
-        results.intersection(evaluate(child_nodes[5]))
-      end
-      
-      for_or_comparison do
-        results = do_comparison(evaluate(child_nodes[0]), evaluate(child_nodes[1]), evaluate(child_nodes[2]))
-        results.union(evaluate(child_nodes[4]))
-      end
-      
-      for_not_or_comparison do
-        results = do_comparison(evaluate(child_nodes[1]), evaluate(child_nodes[2]), evaluate(child_nodes[3]), true)
-        results.union(evaluate(child_nodes[5]))
       end
       
       for_equal { lambda { |v1, v2| v1 == v2 } }
@@ -296,14 +305,6 @@ module SDB
   
     def val(node)
       node.token.value
-    end
-  
-    def all_items
-      unless @all_items
-        @all_items = @domain.items.each { |k| k.name }.to_set
-      end
-      
-      return @all_items
     end
   
     # Apply the given comparison params to every item in the domain
