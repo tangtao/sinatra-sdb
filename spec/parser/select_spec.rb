@@ -13,10 +13,10 @@ describe "Select Parser Test" do
     end
     
     it "query with simple where" do
-      checkSQLparser("select * from book where a = v1")
+      checkSQLparser("select * from book where a = 'v1'")
     end
     it "query with logic where" do
-      checkSQLparser("select * from book where (a1 = v1 or a3 = v3) and (a2 = v2 or a4 = v4)")
+      checkSQLparser("select * from book where (a1 = 'v1' or a3 = 'v3') and (a2 = 'v2' or a4 = 'v4')")
     end
     it "query with sort" do
       checkSQLparser("select * from bookmark_0001 order by xxx limit 1")
@@ -56,14 +56,14 @@ describe "Select Parser Test" do
       end
   
       it "item name" do
-        query = "select itemName from #{@domain.name}"
+        query = "select itemName() from #{@domain.name}"
         result = @selexecutor.do_query(query, @user)
         result.count.should == 1
         result[0] == @item.name
       end
   
       it "count" do
-        query = "select count from #{@domain.name}"
+        query = "select count(*) from #{@domain.name}"
         result = @selexecutor.do_query(query, @user)
         result.should == 1
       end
@@ -71,7 +71,7 @@ describe "Select Parser Test" do
 
     describe "Simple Predicate" do
       it "one item, one attr" do
-        query = "select * from #{@domain.name} where (#{@attr1.name} = #{@attr1.content})"
+        query = "select * from #{@domain.name} where (#{@attr1.name} = '#{@attr1.content}')"
         result = @selexecutor.do_query(query, @user)
         result.count.should == 1
       end
@@ -79,7 +79,7 @@ describe "Select Parser Test" do
       it "two item, one attr" do
         item2 = Item.make!(:domain => @domain)
         attr2 = Attr.make!(:item => item2)
-        query = "select * from #{@domain.name} where (#{attr2.name} = #{attr2.content})"
+        query = "select * from #{@domain.name} where (#{attr2.name} = '#{attr2.content}')"
         result = @selexecutor.do_query(query, @user).to_a
         result.count.should == 1
         result[0].name.should == item2.name
@@ -95,20 +95,20 @@ describe "Select Parser Test" do
 
       it "AND expr" do
         query = "select * from #{@domain.name} where (#{@attr1.name} = " +
-                "#{@attr1.content}) and (#{@attr2.name} = #{@attr2.content})"
+                "'#{@attr1.content}') and (#{@attr2.name} = '#{@attr2.content}')"
         result = @selexecutor.do_query(query, @user).to_a
         result.count.should == 0
       end
 
       it "OR expr" do
         query = "select * from #{@domain.name} where (#{@attr1.name} = " +
-                "#{@attr1.content}) or (#{@attr2.name} = #{@attr2.content})"
+                "'#{@attr1.content}') or (#{@attr2.name} = '#{@attr2.content}')"
         result = @selexecutor.do_query(query, @user).to_a
         result.count.should == 2
       end
 
       it "NOT expr" do
-        query = "select * from #{@domain.name} where not (#{@attr1.name} = #{@attr1.content})"
+        query = "select * from #{@domain.name} where not (#{@attr1.name} = '#{@attr1.content}')"
         result = @selexecutor.do_query(query, @user).to_a
         result.count.should == 1
         result[0].name.should == @item2.name
@@ -130,7 +130,7 @@ describe "Select Parser Test" do
 
       it "No.1" do
         query = "select * from #{@domain.name} where (#{@attr2_1.name} = " +
-                "#{@attr2_1.content}) intersection (#{@attr3_2.name} = #{@attr3_2.content})"
+                "'#{@attr2_1.content}') intersection (#{@attr3_2.name} = '#{@attr3_2.content}')"
         result = @selexecutor.do_query(query, @user).to_a
         result.count.should == 1
       end
@@ -150,7 +150,7 @@ describe "Select Parser Test" do
 
 
       it "Simple Sort" do
-        query = "select * from #{@domain.name} where #{@attr2_1.name} = #{@attr2_1.content} order by #{@attr2_1.name} "
+        query = "select * from #{@domain.name} where #{@attr2_1.name} = '#{@attr2_1.content}' order by #{@attr2_1.name} "
         result = @selexecutor.do_query(query, @user)
         result.count.should == 2
         attr0 = result[0].attrs.find_by_name(@attr2_1.name).content
@@ -159,7 +159,7 @@ describe "Select Parser Test" do
       end
   
       it "Simple Sort Desc" do
-        query = "select * from #{@domain.name} where #{@attr2_1.name} = #{@attr2_1.content} order by #{@attr2_1.name} desc"
+        query = "select * from #{@domain.name} where #{@attr2_1.name} = '#{@attr2_1.content}' order by #{@attr2_1.name} desc"
         result = @selexecutor.do_query(query, @user)
         result.count.should == 2
         attr0 = result[0].attrs.find_by_name(@attr2_1.name).content
@@ -168,7 +168,13 @@ describe "Select Parser Test" do
       end
 
       it "Simple Limit Only" do
-        query = "select * from #{@domain.name} where #{@attr2_1.name} = #{@attr2_1.content} limit 1"
+        query = "select * from #{@domain.name} where #{@attr2_1.name} = '#{@attr2_1.content}' limit 1"
+        result = @selexecutor.do_query(query, @user)
+        result.count.should == 1
+      end
+
+      it "Simple Sort and Limit" do
+        query = "select * from #{@domain.name} where #{@attr2_1.name} = '#{@attr2_1.content}' order by #{@attr2_1.name} limit 1"
         result = @selexecutor.do_query(query, @user)
         result.count.should == 1
       end

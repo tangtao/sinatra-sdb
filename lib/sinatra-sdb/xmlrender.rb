@@ -163,6 +163,31 @@ module SDB
         end
       end
       
+      def Select(items)
+                         
+        xml do |x|
+          x.SelectResponse do
+            x.SelectResult do
+              items.each do |item|
+                iname, attrs = item
+                x.Item do
+                  x.ItemName iname
+                  attrs.each do |a|
+                    x.Attribute do
+                      x.Name a[:name]
+                      x.Value a[:value]
+                    end
+                  end
+                end
+              end
+            end
+            x.ResponseMetadata do
+              x.RequestId requestId
+              x.BoxUsage boxUsage
+            end
+          end
+        end
+      end
 
       private
       

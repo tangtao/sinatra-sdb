@@ -28,8 +28,8 @@ module SDB
 
     for_symbol('output') do
       all_output          %w| * |
-      item_name_output    %w| itemName |
-      count_output        %w| count |
+      item_name_output    %w| itemName ( ) |
+      count_output        %w| count ( * ) |
     end
 
     for_symbol('domain') do
@@ -70,7 +70,7 @@ module SDB
     end
     
     for_symbol('identifier') do
-      identifier           %w| quoted_string |
+      identifier           %w| identifier_string |
     end
     
     for_symbol('constant') do
@@ -114,9 +114,13 @@ module SDB
         create_token(keyword)
       end
     end
+
+    for_pattern("'(\\\\'|[^'])+'") do
+      create_token 'quoted_string'
+    end
     
     for_pattern('[a-zA-Z][a-zA-Z0-9_]*') do
-      create_token 'quoted_string'
+      create_token 'identifier_string'
     end
 
     for_pattern('[0-9]+') do

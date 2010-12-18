@@ -65,6 +65,13 @@ module SDB
         result[:attributeNames] = readAttrNames2Array(params)
         result
       end
+
+      def Select(params)
+        result = {}
+        result[:key] = params[:AWSAccessKeyId]
+        result[:selectExpression] = params[:SelectExpression]
+        result
+      end
       
       private
       

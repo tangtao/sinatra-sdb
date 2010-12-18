@@ -18,22 +18,15 @@ module SDB
       for_select_without_conditions do
         output_type = evaluate(child_nodes[1])
         domain = evaluate(child_nodes[3])
-
-        case output_type
-        when :all
-          domain.items
-        when :itemName
-          domain.items.map{|i| i.name}
-        when :count
-          domain.items.count
-        end
+        output_by_type(output_type, domain.items)
       end
 
       for_select_with_conditions do
         output_type = evaluate(child_nodes[1])
         @domain = evaluate(child_nodes[3])
-        items = evaluate(child_nodes[4])
-        if @sort_name
+        items = evaluate(child_nodes[4]).to_a
+        
+        if @sort_name.present?
           items = items.sort do |a, b|
             a1 = a.attrs.find_by_name(@sort_name)
             b1 = b.attrs.find_by_name(@sort_name)
@@ -45,18 +38,10 @@ module SDB
           end
         end
         
-        if @limit_number
-          items = items.to_a[0,@limit_number]
+        if @limit_number.present?
+          items = items[0,@limit_number]
         end
-
-        case output_type
-        when :all
-          items
-        when :itemName
-          items.map{|i| i.name}
-        when :count
-          items.count
-        end
+        output_by_type(output_type, items)
       end
       
       for_only_where do
@@ -155,12 +140,23 @@ module SDB
       for_starts_with { lambda { |v1, v2| v2[0...v1.length] == v1 } }
       
       for_identifier { val(child_nodes[0]) }
-      for_constant { val(child_nodes[0]) }
+      for_constant { val(child_nodes[0])[1..-2] }
       for_number { val(child_nodes[0]) }
     end
   
     def val(node)
       node.token.value
+    end
+    def output_by_type(typ, items)
+      case typ
+      when :all
+        items
+      when :itemName
+        items.map{|i| i.name}
+      when :count
+        items.count
+      end
+
     end
   
     # Apply the given comparison params to every item in the domain
