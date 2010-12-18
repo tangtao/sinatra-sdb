@@ -19,12 +19,20 @@ describe "Select Parser Test" do
       checkSQLparser("select * from book where (a1 = v1 or a3 = v3) and (a2 = v2 or a4 = v4)")
     end
     it "query with sort" do
-      checkSQLparser("select * from bookmark_0001 order by xxx limit zzz")
+      checkSQLparser("select * from bookmark_0001 order by xxx limit 1")
       checkSQLparser("select * from bookmark_0001 order by xxx")
+    end
+
+    it "query with limit" do
+      checkSQLparser("select * from bookmark_0001 order by xxx limit 100")
+      checkSQLparser("select * from bookmark_0001 limit 100")
     end
     
     def checkSQLparser(query_string)
       parse_result = @parser.parse(@lexer.lex(query_string))
+      if parse_result.class != Dhaka::ParseSuccessResult
+        pp parse_result
+      end
       parse_result.class.should == Dhaka::ParseSuccessResult
     end
 
@@ -129,7 +137,7 @@ describe "Select Parser Test" do
   
     end
 
-    describe "Sort Condition" do
+    describe "Sort and Limit Condition" do
       before(:each) do
         @item2 = Item.make!(:domain => @domain)
         @attr2_1 = Attr.make!(:item => @item2)
@@ -141,14 +149,32 @@ describe "Select Parser Test" do
       end
 
 
-      it "No.1" do
+      it "Simple Sort" do
         query = "select * from #{@domain.name} where #{@attr2_1.name} = #{@attr2_1.content} order by #{@attr2_1.name} "
-        result = @selexecutor.do_query(query, @user).to_a
+        result = @selexecutor.do_query(query, @user)
         result.count.should == 2
-        result[0].id.should > result[1].id
+        attr0 = result[0].attrs.find_by_name(@attr2_1.name).content
+        attr1 = result[1].attrs.find_by_name(@attr2_1.name).content
+        attr0.should <= attr1
       end
   
+      it "Simple Sort Desc" do
+        query = "select * from #{@domain.name} where #{@attr2_1.name} = #{@attr2_1.content} order by #{@attr2_1.name} desc"
+        result = @selexecutor.do_query(query, @user)
+        result.count.should == 2
+        attr0 = result[0].attrs.find_by_name(@attr2_1.name).content
+        attr1 = result[1].attrs.find_by_name(@attr2_1.name).content
+        attr0.should >= attr1
+      end
+
+      it "Simple Limit Only" do
+        query = "select * from #{@domain.name} where #{@attr2_1.name} = #{@attr2_1.content} limit 1"
+        result = @selexecutor.do_query(query, @user)
+        result.count.should == 1
+      end
+
     end
+
 
 
   end

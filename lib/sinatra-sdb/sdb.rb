@@ -30,7 +30,7 @@ module SDB
   PUBLIC_PATH = File.expand_path(SDB.config[:public_path] || File.join(ROOT_DIR, 'public'))
 end
 
-%w(query_expression select_expression).each {|r| require "#{File.dirname(__FILE__)}/parser/#{r}"}
-%w(errors helpers sql_storage xmlrender param_check action main).each {|r| require "#{File.dirname(__FILE__)}/#{r}"}
-%w(attr item domain user).each {|r| require "#{File.dirname(__FILE__)}/models/#{r}"}
-
+curr_dir = File.dirname(__FILE__)
+%w(query_expression select_expression select_evaluator select_executor).each {|r| require "#{curr_dir}/parser/#{r}"}
+%w(errors helpers sql_storage xmlrender param_check action main).each {|r| require "#{curr_dir}/#{r}"}
+%w(attr item domain user).each {|r| require "#{curr_dir}/models/#{r}"}
