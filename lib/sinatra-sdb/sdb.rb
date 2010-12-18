@@ -31,6 +31,6 @@ module SDB
 end
 
 curr_dir = File.dirname(__FILE__)
-%w(query_expression select_expression select_evaluator select_executor).each {|r| require "#{curr_dir}/parser/#{r}"}
+%w(query_expression select_parser select_evaluator select_executor).each {|r| require "#{curr_dir}/parser/#{r}"}
 %w(errors helpers sql_storage xmlrender param_check action main).each {|r| require "#{curr_dir}/#{r}"}
 %w(attr item domain user).each {|r| require "#{curr_dir}/models/#{r}"}
