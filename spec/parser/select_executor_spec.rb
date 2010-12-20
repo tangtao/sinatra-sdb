@@ -27,7 +27,7 @@ describe "Select Executor Test" do
       query = "select * from #{@domain.name}"
       result = @selexecutor.do_query(query, @user)
       result.count.should == 3
-      result[0].name.should == @item1.name
+      result[0][0].should == @item1.name
     end
 
     it "item name" do
@@ -40,8 +40,24 @@ describe "Select Executor Test" do
     it "count" do
       query = "select count(*) from #{@domain.name}"
       result = @selexecutor.do_query(query, @user)
-      result.should == 3
+      result[0][1][0][:value].to_i.should == 3
     end
+
+    it "explicit list of attributes" do
+      query = "select #{@attr2_1.name},#{@attr2_2.name} from #{@domain.name}"
+      attrs = Set.new
+      attrs << @attr2_1.name
+      attrs << @attr2_2.name
+      
+      result = @selexecutor.do_query(query, @user)
+      rattrs = Set.new
+      result.each do |item|
+        item[1].each {|a| rattrs << a[:name]}
+      end
+      rattrs.should == attrs
+    end
+
+
   end
 
   describe "Simple Predicate" do
@@ -95,18 +111,18 @@ describe "Select Executor Test" do
       query = "select * from #{@domain.name} where #{@attr2_1.name} = '#{@attr2_1.content}' order by #{@attr2_1.name} "
       result = @selexecutor.do_query(query, @user)
       result.count.should == 2
-      attr0 = result[0].attrs.find_by_name(@attr2_1.name).content
-      attr1 = result[1].attrs.find_by_name(@attr2_1.name).content
-      attr0.should <= attr1
+      attr0 = result[0][1].find{|i| i[:name] == @attr2_1.name}
+      attr1 = result[1][1].find{|i| i[:name] == @attr2_1.name}
+      attr0[:value].should <= attr1[:value]
     end
 
     it "Simple Sort Desc" do
       query = "select * from #{@domain.name} where #{@attr2_1.name} = '#{@attr2_1.content}' order by #{@attr2_1.name} desc"
       result = @selexecutor.do_query(query, @user)
       result.count.should == 2
-      attr0 = result[0].attrs.find_by_name(@attr2_1.name).content
-      attr1 = result[1].attrs.find_by_name(@attr2_1.name).content
-      attr0.should >= attr1
+      attr0 = result[0][1].find{|i| i[:name] == @attr2_1.name}
+      attr1 = result[1][1].find{|i| i[:name] == @attr2_1.name}
+      attr0[:value].should >= attr1[:value]
     end
 
     it "Simple Limit Only" do

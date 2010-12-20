@@ -25,6 +25,11 @@ describe "Select Grammar Test" do
     checkSQLparser("select * from bookmark_0001 order by xxx limit 100")
     checkSQLparser("select * from bookmark_0001 limit 100")
   end
+
+  it "output with explicit list of attributes" do
+    checkSQLparser("select attr_0001 from bookmark_0001")
+    checkSQLparser("select attr_0001,attr_002,attr_03 from bookmark_0001")
+  end
   
   def checkSQLparser(query_string)
     parse_result = @parser.parse(@lexer.lex(query_string))

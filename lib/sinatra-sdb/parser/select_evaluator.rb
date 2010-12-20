@@ -11,6 +11,7 @@ module SDB
       @sort_name = nil
       @sort_order = nil
       @limit_number = nil
+      @explicit_attr_names = nil
     end
     
     define_evaluation_rules do
@@ -89,6 +90,18 @@ module SDB
       for_all_output {:all}
       for_item_name_output {:itemName}
       for_count_output {:count}
+      for_explicit_attr_output do
+        @explicit_attr_names = evaluate(child_nodes[0])
+        :explicit
+      end
+      
+      for_one_attr_output do
+        [ evaluate(child_nodes[0]) ]
+      end
+
+      for_attr_list_output do
+        [ evaluate(child_nodes[0]) ] + evaluate(child_nodes[2])
+      end
 
       for_one_domain do
         domain_name = evaluate(child_nodes[0])
@@ -149,12 +162,12 @@ module SDB
     end
     def output_by_type(typ, items)
       case typ
-      when :all
-        items
+      when :all,:explicit
+        items.map { |i| [i.name, i.attrs_with_names(@explicit_attr_names)] }
       when :itemName
-        items.map{|i| i.name}
+        items.map{|i| [i.name, []]}
       when :count
-        items.count
+        [["Domain", [{:name => "Count", :value => "#{items.count}"}]]]
       end
 
     end

@@ -113,29 +113,7 @@ module SDB
 
       def Select(args)#(key, queryExpression)
         u = findUserByAccessKey(args[:key])
-        items = @select_executor.do_query(args[:selectExpression], u)
-
-        result = []
-        
-        if items.is_a?(Integer)
-          result << ["Domain", [{:name => "Count", :value => "#{items}"}]]
-        elsif items.count > 0
-          if items[0].is_a?(Item)
-            items.each do |item|
-              ats = []
-              item.attrs.each do |a|
-                ats << {:name => a.name, :value => a.content}
-              end
-              result << [item.name, ats]
-            end
-          else
-            items.each do |item|
-              result << [item.name, [] ]
-            end
-
-          end#end if
-        end#end elsif
-        result
+        @select_executor.do_query(args[:selectExpression], u)
       end
 
       

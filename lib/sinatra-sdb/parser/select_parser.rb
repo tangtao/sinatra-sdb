@@ -27,10 +27,17 @@ module SDB
     end
 
     for_symbol('output') do
-      all_output          %w| * |
-      item_name_output    %w| itemName ( ) |
-      count_output        %w| count ( * ) |
+      all_output              %w| * |
+      item_name_output        %w| itemName ( ) |
+      count_output            %w| count ( * ) |
+      explicit_attr_output    %w| attr_list |
     end
+
+    for_symbol('attr_list') do
+      one_attr_output    %w| identifier |
+      attr_list_output   %w| identifier , attr_list |
+    end
+
 
     for_symbol('domain') do
       one_domain %w| identifier |
@@ -103,7 +110,11 @@ module SDB
     for_pattern('\*') do
       create_token('*')
     end
-    
+
+    for_pattern(',') do
+      create_token(',')
+    end
+  
     for_pattern('\s+') do
       # ignore whitespace
     end
