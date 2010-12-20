@@ -3,6 +3,7 @@ require File.dirname(__FILE__) + '/spec_helper'
 describe "QueryWithAttributes Action" do
   
   before(:each) do
+    dbclean()
   end
   
   describe "All" do

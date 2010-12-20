@@ -2,7 +2,8 @@ require File.dirname(__FILE__) + '/spec_helper'
 
 describe "Query Action" do
   
-  before(:each) do
+  before(:all) do
+    dbclean()
   end
   
   describe "All" do

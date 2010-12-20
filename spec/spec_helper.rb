@@ -21,6 +21,10 @@ module SDB
       end
     end
 
+    def dbclean
+      DatabaseCleaner.clean
+    end
+
   end
 end
 
@@ -57,7 +61,7 @@ Spork.prefork do
     end
   
     config.after(:each) do
-      DatabaseCleaner.clean
+      #DatabaseCleaner.clean
     end
   end
 

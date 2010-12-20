@@ -2,8 +2,8 @@ require File.dirname(__FILE__) + '/spec_helper'
 
 describe "CreateDomain Action" do
  
-  
   before(:each) do
+    dbclean()
     @user = User.make!
     @sdb = getSdb(@user)
   end
