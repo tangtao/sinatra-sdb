@@ -30,6 +30,14 @@ describe "Select Grammar Test" do
     checkSQLparser("select attr_0001 from bookmark_0001")
     checkSQLparser("select attr_0001,attr_002,attr_03 from bookmark_0001")
   end
+
+  it "itemName() predicate" do
+    checkSQLparser("select attr_0001 from bookmark_0001 where itemName() = 'v1'")
+  end
+
+  it "every() predicate" do
+    checkSQLparser("select attr_0001 from bookmark_0001 where every(attr_001) = 'v1'")
+  end
   
   def checkSQLparser(query_string)
     parse_result = @parser.parse(@lexer.lex(query_string))

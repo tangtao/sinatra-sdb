@@ -8,7 +8,8 @@ gem 'activerecord', '>= 3.0.0'
 gem 'builder'
 gem 'mysql'
 gem 'uuidtools'
-gem 'dhaka', :path => File.join(File.dirname(__FILE__), '..', 'lib', 'dhaka')
+#gem 'dhaka', :path => File.join(File.dirname(__FILE__), '..', 'lib', 'dhaka')
+gem 'foreverman-dhaka', :git => "git://github.com/foreverman/dhaka.git" , :require => "dhaka"
 gem 'sqlite3-ruby'
 gem 'rack-test'
 gem 'rspec'

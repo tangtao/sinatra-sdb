@@ -63,7 +63,9 @@ module SDB
     end
     
     for_symbol('predicate') do
-      single_comparison    %w| identifier comp_op constant |
+      single_comparison       %w| identifier comp_op constant |
+      item_name_comparison    %w| itemName ( ) comp_op constant |
+      every_key_comparison    %w| every ( identifier ) comp_op constant |
     end
     
     for_symbol('comp_op') do
@@ -119,7 +121,9 @@ module SDB
       # ignore whitespace
     end
     
-    KEYWORDS = %w| select itemName count from where not and or intersection order by asc desc limit |
+    KEYWORDS = %w| select itemName count from where every 
+                    not and or intersection order by asc desc limit |
+
     KEYWORDS.each do |keyword|
       for_pattern(keyword) do
         create_token(keyword)

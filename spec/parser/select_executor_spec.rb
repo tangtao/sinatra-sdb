@@ -13,13 +13,17 @@ describe "Select Executor Test" do
     @domain = @item1.domain
     @user = @domain.user
 
-    @item2 = Item.make!(:domain => @domain)
-    @attr2_1 = Attr.make!(:item => @item2)
-    @attr2_2 = Attr.make!(:item => @item2)
+    @item2  = Item.make!(:domain => @domain)
+    @attr2_1  = Attr.make!(:item => @item2)
+    @attr2_2  = Attr.make!(:item => @item2)
+    @attr2_3  = Attr.make!(:item => @item2)
+    @attr2_3x = Attr.make!(:item => @item2,:name => @attr2_3.name)
+
     
     @item3 = Item.make!(:domain => @domain)
-    @attr3_1 = Attr.make!(:item => @item3, :name => @attr2_1.name, :content => @attr2_1.content)
-    @attr3_2 = Attr.make!(:item => @item3)
+    @attr3_1  = Attr.make!(:item => @item3, :name => @attr2_1.name, :content => @attr2_1.content)
+    @attr3_2  = Attr.make!(:item => @item3)
+    @attr3_3  = Attr.make!(:item => @item3, :name => @attr2_3.name, :content => @attr2_3.content)
   end
 
   describe "Output" do
@@ -65,6 +69,19 @@ describe "Select Executor Test" do
       query = "select * from #{@domain.name} where (#{@attr1_1.name} = '#{@attr1_1.content}')"
       result = @selexecutor.do_query(query, @user)
       result.count.should == 1
+    end
+
+    it "itemName()" do
+      query = "select * from #{@domain.name} where itemName() = '#{@item3.name}' "
+      result = @selexecutor.do_query(query, @user)
+      result.count.should == 1
+    end
+
+    it "every()" do
+      query = "select * from #{@domain.name} where every(#{@attr3_3.name}) = '#{@attr3_3.content}'"
+      result = @selexecutor.do_query(query, @user)
+      result.count.should == 1
+
     end
 
   end

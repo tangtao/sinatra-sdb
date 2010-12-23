@@ -1,7 +1,8 @@
-PATH
-  remote: /home/tangtao/m/www/lib/dhaka
+GIT
+  remote: git://github.com/foreverman/dhaka.git
+  revision: 5d6c1e81bd724a883fc570efd80bfcb95b163307
   specs:
-    dhaka (2.2.1)
+    foreverman-dhaka (0.0.0)
 
 GEM
   remote: http://rubygems.org/
@@ -67,7 +68,7 @@ DEPENDENCIES
   activerecord (>= 3.0.0)
   builder
   database_cleaner
-  dhaka!
+  foreverman-dhaka!
   machinist (>= 2.0.0.beta2)
   mysql
   nokogiri

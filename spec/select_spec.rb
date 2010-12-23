@@ -4,27 +4,38 @@ describe "Select Action" do
   
   before(:all) do
     dbclean()
+    @attr1 = Attr.make!
+    @item = @attr1.item
+    @domain = @item.domain
+    @user = @domain.user
+    @sdb = getSdb(@user)
   end
   
-  describe "All" do
-    
-    it "Single query Success" do
-      attr1 = Attr.make!
-      item = attr1.item
-      domain = item.domain
-      user = domain.user
-      sdb = getSdb(user)
-      select_expression = "select * from #{domain.name} where #{attr1.name}='#{attr1.content}'"
-      link = sdb.select_link(select_expression)
+  it "Return all with single query" do
+    select_expression = "select * from #{@domain.name} where #{@attr1.name}='#{@attr1.content}'"
+    link = @sdb.select_link(select_expression)
 
-      get link
-      #pp last_response.body
+    get link
+    #pp last_response.body
 
-      last_response.should be_ok
-      checkResponse(last_response.body, 'ItemName').should == [item.name]
-    end
-
-
+    last_response.should be_ok
+    checkResponse(last_response.body, 'ItemName').should == [@item.name]
+    checkResponse(last_response.body, 'Attribute Name').should == [@attr1.name]
+    checkResponse(last_response.body, 'Attribute Value').should == [@attr1.content]
   end
+
+  it "Return count with single query" do
+    select_expression = "select count(*) from #{@domain.name} where #{@attr1.name}='#{@attr1.content}'"
+    link = @sdb.select_link(select_expression)
+
+    get link
+    #pp last_response.body
+
+    last_response.should be_ok
+    checkResponse(last_response.body, 'ItemName').should == ["Domain"]
+    checkResponse(last_response.body, 'Attribute Name').should == ["Count"]
+    checkResponse(last_response.body, 'Attribute Value').should == ["1"]
+  end
+
 
 end

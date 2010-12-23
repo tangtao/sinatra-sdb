@@ -140,7 +140,41 @@ module SDB
       end
       
       for_single_comparison do
-        do_comparison(evaluate(child_nodes[0]), evaluate(child_nodes[1]), evaluate(child_nodes[2]))
+        attr_name = evaluate(child_nodes[0])
+        attr_action = Proc.new do |item, op, constant|
+          match = false
+          attrs = item.attrs.find_all_by_name(attr_name)
+          attrs.each do |attr|
+            if op.call(constant, attr.content)
+              match = true
+            end
+          end
+          match
+        end
+        do_comparison(attr_action, evaluate(child_nodes[1]), evaluate(child_nodes[2]))
+      end
+
+      for_item_name_comparison do
+        item_action = Proc.new do |item, op, constant|
+          op.call(constant, item.name)
+        end
+        do_comparison(item_action, evaluate(child_nodes[3]), evaluate(child_nodes[4]))
+      end
+
+      for_every_key_comparison do
+        attr_name = evaluate(child_nodes[2])
+        every_action = Proc.new do |item, op, constant|
+          match = true
+          attrs = item.attrs.find_all_by_name(attr_name)
+          match = false if attrs.count == 0
+          attrs.each do |attr|
+            unless op.call(constant, attr.content)
+              match = false
+            end
+          end
+          match
+        end
+        do_comparison(every_action, evaluate(child_nodes[4]), evaluate(child_nodes[5]))
       end
       
       for_equal { lambda { |v1, v2| v1 == v2 } }
@@ -173,23 +207,20 @@ module SDB
     end
   
     # Apply the given comparison params to every item in the domain
-    def do_comparison(identifier, op, constant, negate = false)  
+    def do_comparison(item_action, op, constant)
       results = Set.new
       
       if @domain
         @domain.items.each do |item|
-          attrs = item.attrs.find_all_by_name(identifier)
-          attrs.each do |attr|
-            match = op.call(constant, attr.content)
-            if (match && !negate) || (negate && !match)
-              results << item
-              break
-            end
+          if item_action.call(item, op, constant)
+            results << item
           end
         end
       end
       
       results
     end
+
+
   end
 end
