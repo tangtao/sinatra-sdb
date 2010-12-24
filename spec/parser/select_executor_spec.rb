@@ -112,6 +112,18 @@ describe "Select Executor Test" do
       result.count.should == 2
     end
 
+    it "like" do
+      query = "select * from #{@domain.name} where year like '200%'"
+      result = @selexecutor.do_query(query, @user)
+      result.count.should == 1
+    end
+
+    it "not like" do
+      query = "select * from #{@domain.name} where year not like '200%'"
+      result = @selexecutor.do_query(query, @user)
+      result.count.should == 2
+    end
+
     it "every()" do
       query = "select * from #{@domain.name} where every(#{@attr3_3.name}) = '#{@attr3_3.content}'"
       result = @selexecutor.do_query(query, @user)

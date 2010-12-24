@@ -215,8 +215,8 @@ module SDB
       for_less_or_equal { lambda { |v1, v2| v1 <= v2 } }
       # TODO ['a1' != 'v2'] should return false if a1 has values v1 AND v2
       for_not_equal { lambda { |v1, v2| v1 != v2 } }
-      
-      for_like_op { lambda { |v1, v2| v1 == v2 } }
+      for_like_op { lambda { |v1, v2| v2 =~ Regexp.new(v1.gsub('%', '[:print:]*')) } }
+      for_not_like_op { lambda { |v1, v2| not(v2 =~ Regexp.new(v1.gsub('%', '[:print:]*'))) } }
       
       for_identifier { val(child_nodes[0]) }
       for_constant { val(child_nodes[0])[1..-2] }
