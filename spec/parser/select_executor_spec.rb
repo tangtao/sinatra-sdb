@@ -100,6 +100,17 @@ describe "Select Executor Test" do
       result.count.should == 2
     end
 
+    it "is null with attr" do
+      query = "select * from #{@domain.name} where #{@attr2_1.name} is null"
+      result = @selexecutor.do_query(query, @user)
+      result.count.should == 1
+    end
+
+    it "is not null with attr" do
+      query = "select * from #{@domain.name} where #{@attr2_1.name} is not null"
+      result = @selexecutor.do_query(query, @user)
+      result.count.should == 2
+    end
 
     it "every()" do
       query = "select * from #{@domain.name} where every(#{@attr3_3.name}) = '#{@attr3_3.content}'"

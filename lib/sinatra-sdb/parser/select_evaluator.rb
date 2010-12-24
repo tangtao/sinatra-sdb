@@ -157,6 +157,27 @@ module SDB
         results1 & results2
       end
 
+      for_is_null_comparison do
+        results = Set.new
+        attr_name = evaluate(child_nodes[0])
+        if @domain
+          @domain.items.each do |item|
+            results << item if item.attrs.find_all_by_name(attr_name).count == 0
+          end
+        end
+        results
+      end
+
+      for_is_not_null_comparison do
+        results = Set.new
+        attr_name = evaluate(child_nodes[0])
+        if @domain
+          @domain.items.each do |item|
+            results << item if item.attrs.find_all_by_name(attr_name).count > 0
+          end
+        end
+        results
+      end
 
       for_every_key_comparison do
         attr_name = evaluate(child_nodes[2])
