@@ -10,6 +10,7 @@ describe "Select Executor Test" do
     
     @attr1_1 = Attr.make!
     @item1 = @attr1_1.item
+    @attr1_Y  = Attr.make!(:item => @item1,:name => 'year', :content => '2009')
     @domain = @item1.domain
     @user = @domain.user
 
@@ -18,12 +19,14 @@ describe "Select Executor Test" do
     @attr2_2  = Attr.make!(:item => @item2)
     @attr2_3  = Attr.make!(:item => @item2)
     @attr2_3x = Attr.make!(:item => @item2,:name => @attr2_3.name)
+    @attr2_Y  = Attr.make!(:item => @item2,:name => 'year', :content => '2010')
 
     
     @item3 = Item.make!(:domain => @domain)
     @attr3_1  = Attr.make!(:item => @item3, :name => @attr2_1.name, :content => @attr2_1.content)
     @attr3_2  = Attr.make!(:item => @item3)
     @attr3_3  = Attr.make!(:item => @item3, :name => @attr2_3.name, :content => @attr2_3.content)
+    @attr3_Y  = Attr.make!(:item => @item3,:name => 'year', :content => '2011')
   end
 
   describe "Output" do
@@ -69,19 +72,40 @@ describe "Select Executor Test" do
       query = "select * from #{@domain.name} where (#{@attr1_1.name} = '#{@attr1_1.content}')"
       result = @selexecutor.do_query(query, @user)
       result.count.should == 1
+      result[0] == @item1.name
     end
 
     it "itemName()" do
       query = "select * from #{@domain.name} where itemName() = '#{@item3.name}' "
       result = @selexecutor.do_query(query, @user)
       result.count.should == 1
+      result[0] == @item3.name
     end
+
+    it "in with attr" do
+      query = "select * from #{@domain.name} where #{@attr2_1.name} in ( '#{@attr2_1.content}', 'xxxxxx' )"
+      result = @selexecutor.do_query(query, @user)
+      result.count.should == 2
+    end
+
+    it "in with itemName()" do
+      query = "select * from #{@domain.name} where itemName( ) in ( '#{@item1.name}', '#{@item2.name}' )"
+      result = @selexecutor.do_query(query, @user)
+      result.count.should == 2
+    end
+
+    it "between with attr" do
+      query = "select * from #{@domain.name} where year between '2009' and '2010' "
+      result = @selexecutor.do_query(query, @user)
+      result.count.should == 2
+    end
+
 
     it "every()" do
       query = "select * from #{@domain.name} where every(#{@attr3_3.name}) = '#{@attr3_3.content}'"
       result = @selexecutor.do_query(query, @user)
       result.count.should == 1
-
+      result[0] == @item3.name
     end
 
   end

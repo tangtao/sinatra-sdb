@@ -95,11 +95,11 @@ module SDB
         :explicit
       end
       
-      for_one_attr_output do
+      for_one_element do
         [ evaluate(child_nodes[0]) ]
       end
 
-      for_attr_list_output do
+      for_element_list do
         [ evaluate(child_nodes[0]) ] + evaluate(child_nodes[2])
       end
 
@@ -140,26 +140,23 @@ module SDB
       end
       
       for_single_comparison do
-        attr_name = evaluate(child_nodes[0])
-        attr_action = Proc.new do |item, op, constant|
-          match = false
-          attrs = item.attrs.find_all_by_name(attr_name)
-          attrs.each do |attr|
-            if op.call(constant, attr.content)
-              match = true
-            end
-          end
-          match
-        end
-        do_comparison(attr_action, evaluate(child_nodes[1]), evaluate(child_nodes[2]))
+        do_comparison(evaluate(child_nodes[0]), evaluate(child_nodes[1]), evaluate(child_nodes[2]))
       end
 
-      for_item_name_comparison do
-        item_action = Proc.new do |item, op, constant|
-          op.call(constant, item.name)
-        end
-        do_comparison(item_action, evaluate(child_nodes[3]), evaluate(child_nodes[4]))
+      for_in_comparison do
+        op = lambda { |v1, v2| v1.include?(v2) }
+        do_comparison(evaluate(child_nodes[0]), op, evaluate(child_nodes[3]))
       end
+
+      for_between_comparison do
+        action = evaluate(child_nodes[0])
+        begin_element = evaluate(child_nodes[2])
+        end_element   = evaluate(child_nodes[4])
+        results1 = do_comparison(action, less_or_equal, begin_element)
+        results2 = do_comparison(action, greater_or_equal, end_element)
+        results1 & results2
+      end
+
 
       for_every_key_comparison do
         attr_name = evaluate(child_nodes[2])
@@ -167,15 +164,28 @@ module SDB
           match = true
           attrs = item.attrs.find_all_by_name(attr_name)
           match = false if attrs.count == 0
-          attrs.each do |attr|
-            unless op.call(constant, attr.content)
-              match = false
-            end
-          end
+          attrs.each { |attr| match = false unless op.call(constant, attr.content) }
           match
         end
         do_comparison(every_action, evaluate(child_nodes[4]), evaluate(child_nodes[5]))
       end
+
+      for_identifier_predicate do
+        attr_name = evaluate(child_nodes[0])
+        Proc.new do |item, op, constant|
+          match = false
+          attrs = item.attrs.find_all_by_name(attr_name)
+          attrs.each { |attr| match = true if op.call(constant, attr.content) }
+          match
+        end
+      end
+
+      for_item_name_predicate do
+        Proc.new do |item, op, constant|
+          op.call(constant, item.name)
+        end
+      end
+
       
       for_equal { lambda { |v1, v2| v1 == v2 } }
       for_greater_than { lambda { |v1, v2| v1 > v2 } }
@@ -184,7 +194,8 @@ module SDB
       for_less_or_equal { lambda { |v1, v2| v1 <= v2 } }
       # TODO ['a1' != 'v2'] should return false if a1 has values v1 AND v2
       for_not_equal { lambda { |v1, v2| v1 != v2 } }
-      for_starts_with { lambda { |v1, v2| v2[0...v1.length] == v1 } }
+      
+      for_like_op { lambda { |v1, v2| v1 == v2 } }
       
       for_identifier { val(child_nodes[0]) }
       for_constant { val(child_nodes[0])[1..-2] }
@@ -209,15 +220,11 @@ module SDB
     # Apply the given comparison params to every item in the domain
     def do_comparison(item_action, op, constant)
       results = Set.new
-      
       if @domain
         @domain.items.each do |item|
-          if item_action.call(item, op, constant)
-            results << item
-          end
+          results << item if item_action.call(item, op, constant)
         end
       end
-      
       results
     end
 

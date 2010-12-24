@@ -38,7 +38,34 @@ describe "Select Grammar Test" do
   it "every() predicate" do
     checkSQLparser("select attr_0001 from bookmark_0001 where every(attr_001) = 'v1'")
   end
+
+  it "like predicate" do
+    checkSQLparser("select attr_0001 from bookmark_0001 where attr_001 like 'v1'")
+    checkSQLparser("select attr_0001 from bookmark_0001 where itemName() like 'v1'")
+  end
+
+  it "not like predicate" do
+    checkSQLparser("select attr_0001 from bookmark_0001 where attr_001 not like 'v1'")
+  end
+
+  it "is null predicate" do
+    checkSQLparser("select attr_0001 from bookmark_0001 where attr_001 is null")
+  end
   
+  it "is not null predicate" do
+    checkSQLparser("select attr_0001 from bookmark_0001 where attr_001 is not null")
+  end
+
+  it "between predicate" do
+    checkSQLparser("select attr_0001 from bookmark_0001 where attr_001 between '100' and '200'")
+    checkSQLparser("select attr_0001 from bookmark_0001 where itemName() between '100' and '200'")
+  end
+
+  it "in predicate" do
+    checkSQLparser("select attr_0001 from bookmark_0001 where attr_001 in ('100','200')")
+    checkSQLparser("select attr_0001 from bookmark_0001 where itemName() in ('100','200')")
+  end
+
   def checkSQLparser(query_string)
     parse_result = @parser.parse(@lexer.lex(query_string))
     if parse_result.class != Dhaka::ParseSuccessResult

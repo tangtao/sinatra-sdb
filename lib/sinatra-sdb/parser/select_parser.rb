@@ -30,14 +30,8 @@ module SDB
       all_output              %w| * |
       item_name_output        %w| itemName ( ) |
       count_output            %w| count ( * ) |
-      explicit_attr_output    %w| attr_list |
+      explicit_attr_output    %w| element_list |
     end
-
-    for_symbol('attr_list') do
-      one_attr_output    %w| identifier |
-      attr_list_output   %w| identifier , attr_list |
-    end
-
 
     for_symbol('domain') do
       one_domain %w| identifier |
@@ -63,9 +57,12 @@ module SDB
     end
     
     for_symbol('predicate') do
-      single_comparison       %w| identifier comp_op constant |
-      item_name_comparison    %w| itemName ( ) comp_op constant |
-      every_key_comparison    %w| every ( identifier ) comp_op constant |
+      single_comparison                 %w| identifier_predicate comp_op constant |
+      between_comparison                %w| identifier_predicate between constant and constant |
+      in_comparison                     %w| identifier_predicate in ( element_list ) |
+      is_null_comparison                %w| identifier is null |
+      is_not_null_comparison            %w| identifier is not null |
+      every_key_comparison              %w| every ( identifier ) comp_op constant |
     end
     
     for_symbol('comp_op') do
@@ -75,9 +72,27 @@ module SDB
       greater_or_equal     %w| >= |
       less_or_equal        %w| <= |
       not_equal            %w| != |
-      starts_with          %w| starts-with |
+      like_op              %w| like |
+      not_like_op          %w| not like |
+    end
+
+    for_symbol('identifier_predicate') do
+      identifier_predicate           %w| identifier |
+      item_name_predicate           %w| itemName ( ) |
     end
     
+
+
+    for_symbol('element_list') do
+      one_element     %w| element |
+      element_list    %w| element , element_list |
+    end
+
+    for_symbol('element') do
+      one_constant     %w| constant |
+      one_identifier   %w| identifier |
+    end
+
     for_symbol('identifier') do
       identifier           %w| identifier_string |
     end
@@ -95,7 +110,7 @@ module SDB
   # The lexer for the query language.
   class SelectLexerSpec < Dhaka::LexerSpecification
     
-    %w| = > < >= <= != starts-with |.each do |op|
+    %w| = > < >= <= != like between in is null |.each do |op|
       for_pattern(op) do
         create_token(op)
       end
