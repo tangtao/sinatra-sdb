@@ -219,7 +219,8 @@ module SDB
       for_not_like_op { lambda { |v1, v2| not(v2 =~ Regexp.new(v1.gsub('%', '[:print:]*'))) } }
       
       for_identifier { val(child_nodes[0]) }
-      for_constant { val(child_nodes[0])[1..-2] }
+      for_constant_with_single_quoted { val(child_nodes[0])[1..-2] }
+      for_constant_with_double_quoted { val(child_nodes[0])[1..-2] }
       for_number { val(child_nodes[0]) }
     end
   

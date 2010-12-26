@@ -98,7 +98,8 @@ module SDB
     end
     
     for_symbol('constant') do
-      constant            %w| quoted_string |
+      constant_with_single_quoted            %w| single_quoted_string |
+      constant_with_double_quoted            %w| double_quoted_string |
     end
 
     for_symbol('number') do
@@ -145,8 +146,12 @@ module SDB
       end
     end
 
-    for_pattern("'(\\\\'|[^'])+'") do
-      create_token 'quoted_string'
+    for_pattern("'(''|[^'])+'") do
+      create_token 'single_quoted_string'
+    end
+
+    for_pattern('"(""|[^"])+"') do
+      create_token 'double_quoted_string'
     end
     
     for_pattern('[a-zA-Z][a-zA-Z0-9_]*') do

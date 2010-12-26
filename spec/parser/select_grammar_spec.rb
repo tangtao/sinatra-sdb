@@ -66,6 +66,12 @@ describe "Select Grammar Test" do
     checkSQLparser("select attr_0001 from bookmark_0001 where itemName() in ('100','200')")
   end
 
+  it "quoted_string" do
+    checkSQLparser("select attr_0001 from bookmark_0001 where attr_001 = 'xxx''yyy'")
+    checkSQLparser('select * from mydomain where attr1 = "He said, ""Thats the ticket!"""')
+  end
+
+
   def checkSQLparser(query_string)
     parse_result = @parser.parse(@lexer.lex(query_string))
     if parse_result.class != Dhaka::ParseSuccessResult
