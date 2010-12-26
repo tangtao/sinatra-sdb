@@ -8,6 +8,7 @@ class CreateItems < ActiveRecord::Migration
       
       t.timestamps
     end
+    add_index :items, [:domain_id, :name], :unique => true
   end
 
   def self.down

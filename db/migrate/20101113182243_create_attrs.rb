@@ -9,6 +9,8 @@ class CreateAttrs < ActiveRecord::Migration
       
       t.timestamps
     end
+    add_index :attrs, [:item_id, :name, :md5sum], :unique => true
+    
   end
 
   def self.down
