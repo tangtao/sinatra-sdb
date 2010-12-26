@@ -5,12 +5,21 @@ module SDB
         @render = render
         @storage = storage
         @paramchecker = ParamCheck.new
+        @versions = {"2007-11-07" => ["CreateDomain","DeleteDomain","ListDomains",
+                                        "DomainMetadata", "GetAttributes","PutAttributes","BatchPutAttributes",
+                                        "DeleteAttributes","Query", "QueryWithAttributes", "Select"],
+                       
+                     "2009-04-15" => ["CreateDomain","DeleteDomain","ListDomains",
+                                        "DomainMetadata", "GetAttributes","PutAttributes","BatchPutAttributes",
+                                        "DeleteAttributes","Select"]
+                    }
+                                        
       end
           
       def runAction(params)
         begin
+          checkVersion(params)
           checkSignature(params)
-          
           action = params[:Action]
           result = @paramchecker.send(action, params)
           result = @storage.send(action, result)
@@ -49,6 +58,12 @@ module SDB
       #pp strSignature
       
       if strOldSignature != strSignature
+        raise ServiceError.new("AuthFailure")
+      end
+    end
+    
+    def checkVersion(params)
+      unless @versions[params[:Version]].include?(params[:Action])
         raise ServiceError.new("AuthFailure")
       end
     end

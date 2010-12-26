@@ -42,7 +42,7 @@ describe "BatchPutAttributes Action" do
       item_attrs1 = [item1.name, { attr1_1.name => attr1_1.content, attr1_2.name => attr1_2.content}]
       item_attrs2 = [item2.name, { attr2_1.name => attr2_1.content, attr2_2.name => attr2_2.content}]
       link = sdb.batch_put_attributes_link(domain.name, [item_attrs1, item_attrs2], true)
-      
+
       get link
       #pp last_response.body
 

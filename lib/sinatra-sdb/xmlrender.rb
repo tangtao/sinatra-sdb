@@ -109,17 +109,6 @@ module SDB
         end
       end
       
-      def Select(params)
-        xml do |x|
-          x.SelectResponse do
-            x.ResponseMetadata do
-              x.RequestId requestId
-              x.BoxUsage boxUsage
-            end
-          end
-        end
-      end
-
       def Query(items)
                          
         xml do |x|
