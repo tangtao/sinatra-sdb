@@ -1,12 +1,7 @@
 module SDB
-
-  # All errors are derived from ServiceError.  It's never actually raised itself, though.
-  class ServiceError < Exception
+  module Error
+    class ServiceError < Exception;end
     
-    attr_accessor :status, :msg
-    
-    # A factory for building exception classes.
-    @@error_table = {}
     YAML::load(<<-END).
       AccessFailure: [ 403 , 'Access to the resource "%s" is denied.' ]
       AttributeDoesNotExist: [ 404 , 'Attribute ("%s") does not exist.' ]
@@ -30,13 +25,13 @@ module SDB
       InvalidParameterValue: [ 400 , 'Value ("%s") for parameter MaxNumberOfItems is invalid. MaxNumberOfItems must be between 1 and 2500.' ]
       InvalidParameterValue: [ 400 , 'Value ("%s") for parameter MaxNumberOfDomains is invalid. MaxNumberOfDomains must be between 1 and 100.' ]
       InvalidParameterValue: [ 400 , 'Value ("%s") for parameter "%s" is invalid. "%s".' ]
-      InvalidParameterValue: [ 400 , 'Value ("%s") for parameter Name is invalid. Value exceeds maximum length of 1024.' ]
-      InvalidParameterValue: [ 400 , 'Value ("%s") for parameter Value is invalid. Value exceeds maximum length of 1024.' ]
-      InvalidParameterValue: [ 400 , 'Value ("%s") for parameter DomainName is invalid.' ]
+      InvalidParameterValue_ItemName: [ 400 , 'Value ("%s") for parameter Name is invalid. Value exceeds maximum length of 1024.' ]
+      InvalidParameterValue_AttrName: [ 400 , 'Value ("%s") for parameter Name is invalid. Value exceeds maximum length of 1024.' ]
+      InvalidParameterValue_AttrValue: [ 400 , 'Value ("%s") for parameter Value is invalid. Value exceeds maximum length of 1024.' ]
+      InvalidParameterValue_DomainName: [400, 'Value ("%s") for parameter DomainName is invalid.']
       InvalidParameterValue: [ 400 , 'Value ("%s") for parameter Replace is invalid. The Replace flag should be either true or false.' ]
       InvalidParameterValue: [ 400 , 'Value ("%s") for parameter Expected.Exists is invalid. Expected.Exists should be either true or false.' ]
       InvalidParameterValue: [ 400 , 'Value ("%s") for parameter Name is invalid.The empty string is an illegal attribute name' ]
-      InvalidParameterValue: [ 400 , 'Value ("%s") for parameter Value is invalid. Value exceeds maximum length of 1024' ]
       InvalidParameterValue: [ 400 , 'Value ("%s") for parameter ConsistentRead is invalid. The ConsistentRead flag should be either true or false.' ]
       InvalidQueryExpression: [ 400 , 'The specified query expression syntax is not valid.' ]
       InvalidResponseGroups: [ 400 , 'The following response groups are invalid: "%s".' ]
@@ -50,8 +45,8 @@ module SDB
       MissingAction: [ 400 , 'No action was supplied with this request.' ]
       MissingParameter: [ 400 , 'The request must contain the specified missing parameter.' ]
       MissingParameter: [ 400 , 'The request must contain the parameter "%s".' ]
-      MissingParameter: [ 400 , 'The request must contain the parameter ItemName.' ]
-      MissingParameter: [ 400 , 'The request must contain the parameter DomainName.' ]
+      MissingParameter_ItemName: [400, 'The request must contain the parameter ItemName.']
+      MissingParameter_DomainName: [400, 'The request must contain the parameter DomainName.']
       MissingParameter: [ 400 , 'Attribute.Value missing for Attribute.Name="%s".' ]
       MissingParameter: [ 400 , 'Attribute.Name missing for Attribute.Value="%s".' ]
       MissingParameter: [ 400 , 'No attributes for item ="%s".' ]
@@ -61,10 +56,10 @@ module SDB
       MultipleExpectedNames: [ 400 , 'Only one Expected.Name can be specified' ]
       MultipleExpectedValues: [ 400 , 'Only one Expected.Value can be specified' ]
       MultiValuedAttribute: [ 409 , 'Attribute ("%s") is multi-valued. Conditional check can only be performed on a single-valued attribute' ]
-      NoSuchDomain: [ 400 , 'The specified domain does not exist.' ]
+      NoSuchDomain: [400, 'The specified domain does not exist.']
       NoSuchVersion: [ 400 , 'The requested version ("%s") of service "%s" does not exist.' ]
       NotYetImplemented: [ 401 , 'Feature "%s" is not yet available.' ]
-      NumberDomainsExceeded: [ 409 , 'The domain limit was exceeded.' ]
+      NumberDomainsExceeded: [409, 'The domain limit was exceeded.']
       NumberDomainAttributesExceeded: [ 409 , 'Too many attributes in this domain.' ]
       NumberDomainBytesExceeded: [ 409 , 'Too many bytes in this domain.' ]
       NumberItemAttributesExceeded: [ 409 , 'Too many attributes in this item.' ]
@@ -80,14 +75,18 @@ module SDB
       URITooLong: [ 400 , 'The URI exceeded the maximum limit of "%s".' ]
     END
     each do |code, (status, msg)|
-      @@error_table[code] = [status, msg]
-    end
-
-    def initialize(code, params=[])
-      @status = @@error_table[code][0]
-      @msg = @@error_table[code][1] % params
+      const_set(code, Class.new(ServiceError) do
+        define_method(:initialize) do |*p|
+          @params = p
+        end
+        {:code=>code, :status=>status}.each do |k,v|
+          define_method(k) { v }
+        end
+        define_method(:message) do
+          msg % @params
+        end
+      end)
     end
   
   end
-
 end

@@ -6,15 +6,14 @@ describe "ListDomains Action" do
     dbclean()
   end
   
-  describe "All" do
+  describe "Base" do
     
-    it "List Something Success" do
+    it "List Simple" do
       domain = Domain.make!
       u = domain.user
-      u.domains.count.should == 1
       sdb = getSdb(u)
       link = sdb.list_domains_link()
-      
+    
       get link
   
       last_response.should be_ok

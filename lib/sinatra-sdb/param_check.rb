@@ -7,7 +7,8 @@ module SDB
       def CreateDomain(params)
         result = {}
         result[:key] = params[:AWSAccessKeyId]
-        result[:domainName] = getAndCheckDomainName(params[:DomainName])
+        result[:domainName] = params[:DomainName]
+        verifyDomainName(result[:domainName])
         result
       end
 
@@ -26,16 +27,21 @@ module SDB
       def GetAttributes(params)
         result = {}
         result[:key] = params[:AWSAccessKeyId]
-        result[:domainName] = getAndCheckDomainName(params[:DomainName])
-        result[:itemName] = getAndCheckItemName(params[:ItemName])
+        result[:domainName] = params[:DomainName]
+        verifyDomainName(result[:domainName])
+        result[:itemName] = params[:ItemName]
+        verifyItemName(result[:itemName])
+        result[:attributeNames] = readAttrNames2Array(params)
         result
       end
 
       def PutAttributes(params)
         result = {}
         result[:key] = params[:AWSAccessKeyId]
-        result[:domainName] = getAndCheckDomainName(params[:DomainName])
-        result[:itemName] = getAndCheckItemName(params[:ItemName])
+        result[:domainName] = params[:DomainName]
+        verifyDomainName(result[:domainName])
+        result[:itemName] = params[:ItemName]
+        verifyItemName(result[:itemName])
         result[:attributes] = readAttrs2Array(params)
         result
       end
@@ -43,7 +49,8 @@ module SDB
       def BatchPutAttributes(params)
         result = {}
         result[:key] = params[:AWSAccessKeyId]
-        result[:domainName] = getAndCheckDomainName(params[:DomainName])
+        result[:domainName] = params[:DomainName]
+        verifyDomainName(result[:domainName])
         result[:items_attrs] = readBatchAttrs2Array(params)
         result
       end
@@ -55,7 +62,8 @@ module SDB
       def Query(params)
         result = {}
         result[:key] = params[:AWSAccessKeyId]
-        result[:domainName] = getAndCheckDomainName(params[:DomainName])
+        result[:domainName] = params[:DomainName]
+        verifyDomainName(result[:domainName])
         result[:queryExpression] = params[:QueryExpression]
         result
       end
@@ -82,7 +90,7 @@ module SDB
           a = {:name => params["Attribute.#{x}.Name"], 
                :value => params["Attribute.#{x}.Value"]}
           a[:replace] = true if params["Attribute.#{x}.Replace"] == "true"
-          result.push(a)
+          result << a
           
           x += 1
         end
@@ -118,15 +126,22 @@ module SDB
         end
         result
       end
-      
-      def getAndCheckDomainName(domainName)
-        raise ServiceError.new("AuthFailureXX") if domainName.blank?
-        domainName
+
+      def verifyDomainName(domainName)
+        raise Error::MissingParameter_DomainName.new if domainName.blank?
+        if domainName =~ /[^\w\-\.]/ or domainName.size < 3 or domainName.size > 255
+          raise Error::InvalidParameterValue_DomainName.new([domainName])
+        end
       end
       
-      def getAndCheckItemName(itemName)
-        raise ServiceError.new("AuthFailureXX") if itemName.blank?
-        itemName
+      def verifyItemName(itemName)
+        raise Error::MissingParameter_ItemName.new if itemName.blank?
+        raise Error::InvalidParameterValue_ItemName.new if itemName.size > 1024
+      end
+
+      def verifyAttrName(attrName)
+        raise Error::MissingParameter_AttrName.new if attrName.blank?
+        raise Error::InvalidParameterValue_AttrName.new if attrName.size > 1024
       end
     
   end

@@ -8,14 +8,13 @@ describe "CreateDomain Action" do
     @sdb = getSdb(@user)
   end
   
-  describe "All" do
-    
+  describe "Base" do
     it "Create Success" do
       @user.domains.count.should == 0
   
       link = @sdb.create_domain_link('books')
       get link
-  
+      
       last_response.should be_ok
       @user.domains.count.should == 1
     end
@@ -34,7 +33,6 @@ describe "CreateDomain Action" do
       last_response.should be_ok
       @user.domains.count.should == 1
     end
-  
   end
 
 end

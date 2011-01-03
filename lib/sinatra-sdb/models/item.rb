@@ -1,5 +1,5 @@
 class Item < ActiveRecord::Base
-    has_many   :attrs
+    has_many   :attrs, :dependent => :destroy
     belongs_to :domain
     
     def attrs_with_names(names = nil)

@@ -45,10 +45,17 @@ module RightAws
       link[:request].path
     end
     
-    def get_attributes_link(domain_name, item_name, attribute_name=nil)
-      link = generate_request("GetAttributes", 'DomainName'    => domain_name,
-                                               'ItemName'      => item_name,
-                                               'AttributeName' => attribute_name )
+    def get_attributes_link(domain_name, item_name, attribute_names=nil)
+      attribute_names = Array(attribute_names)
+      
+      request_params = { 'DomainName'       => domain_name,
+                         'ItemName'         => item_name}
+                         
+      attribute_names.each_with_index do |attribute, idx|
+        request_params["AttributeName.#{idx+1}"] = attribute
+      end
+
+      link = generate_request("GetAttributes", request_params )
       link[:request].path
     end
 

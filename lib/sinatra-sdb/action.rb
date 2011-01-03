@@ -25,10 +25,8 @@ module SDB
           result = @storage.send(action, result)
           @render.send(action, result)
         
-        rescue ServiceError => e
+        rescue Error::ServiceError => e
           handleError(e)
-        rescue RuntimeError => e
-          pp e
         end
       end
     
@@ -81,7 +79,7 @@ module SDB
     end
     
     def handleError(error)
-       [error.status, error.msg]
+       [error.status, error.message]
     end
     
     
