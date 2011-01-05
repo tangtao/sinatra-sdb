@@ -60,8 +60,11 @@ module SDB
       def PutAttributes(args)
         u = findUserByAccessKey(args[:key])
         d = u.domains.find_by_name(args[:domainName])
-        Attr.transaction do
-          updateItemAttrs(d, args[:itemName], args[:attributes])
+        item = d.items.find_by_name(args[:itemName])
+        if verifyExpectedValue(item, args[:expecteds])
+          Attr.transaction do
+            updateItemAttrs(item, args[:attributes])
+          end
         end
       end
 
@@ -69,9 +72,10 @@ module SDB
         u = findUserByAccessKey(args[:key])
         d = u.domains.find_by_name(args[:domainName])
         Attr.transaction do
-          args[:items_attrs].each do |item|
-            itemName,attributes = item
-            updateItemAttrs(d, itemName, attributes)
+          args[:items_attrs].each do |i|
+            itemName, attributes = i
+            item = d.items.find_by_name(itemName)
+            updateItemAttrs(item, attributes)
           end
         end
       end
@@ -83,9 +87,15 @@ module SDB
         i = d.items.find_by_name(args[:itemName])
         Attr.transaction do
           args[:attributes].each do |a|
-            v = i.attrs.find_by_name_and_content(a[:name],a[:value])
-            raise ServiceError.new("AttributeDoesNotExist",a[:name]) unless v
-            v.destroy
+            if a[:value].present?
+              a[:value].each do |x|
+                v = i.attrs.find_by_name_and_content(a[:name],x)
+                raise Error::AttributeDoesNotExist(a[:name]) if v.blank?
+                v.destroy
+              end
+            else
+              Attr.destroy(i.attrs.map{|z| z.id})
+            end
           end
         end
       end
@@ -132,21 +142,27 @@ module SDB
         result
       end
 
-      def updateItemAttrs(domain, itemName, attributes)
-        i = domain.items.find_by_name(itemName)
-        i = Item.create(:name => itemName, :domain => domain) if i.blank?
+      def updateItemAttrs(item, attributes)
+        item = Item.create(:name => itemName, :domain => domain) if item.blank?
         attributes.each do |a|
           if a[:replace]
-            need_del_attrs = i.attrs.find_all_by_name(a[:name])
-            Attr.delete(need_del_attrs.map{|x|x.id})
+            need_del_attrs = item.attrs.find_all_by_name(a[:name])
+            Attr.destroy(need_del_attrs.map{|x|x.id})
           end
-          begin
-            Attr.create(:name => a[:name], :content => a[:value], :item => i)
-          rescue ActiveRecord::RecordNotUnique => e
-            pp e
-            #raise
+          a[:value].each { |v| Attr.create(:name => a[:name], :content => v, :item => item) }
+        end
+      end
+
+      def verifyExpectedValue(item, expecteds)
+        expecteds.each do |e|
+          attrs = item.attrs.find_all_by_name(e[:name])
+          if e[:exists]
+            return false if attrs.blank?
+          else
+            return false if attrs[0].value != e[:value]
           end
         end
+        true
       end
     
   end

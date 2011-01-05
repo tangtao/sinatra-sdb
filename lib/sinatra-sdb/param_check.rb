@@ -43,6 +43,7 @@ module SDB
         result[:itemName] = params[:ItemName]
         verifyItemName(result[:itemName])
         result[:attributes] = readAttrs2Array(params)
+        result[:expecteds] = readExpected2Array(params)
         result
       end
 
@@ -84,17 +85,39 @@ module SDB
       private
       
       def readAttrs2Array(params)
-        result = []
+        result_attrs = []
         x = 0
         while params["Attribute.#{x}.Name"]
-          a = {:name => params["Attribute.#{x}.Name"], 
-               :value => params["Attribute.#{x}.Value"]}
+          name = params["Attribute.#{x}.Name"]
+          value = params["Attribute.#{x}.Value"]
+          a = result_attrs.detect {|i| i[:name] == name}
+          if a.blank?
+            a = {:name => name, :value => Set.new(value)}
+            result_attrs << a
+          else
+            a[:value] << value
+          end
           a[:replace] = true if params["Attribute.#{x}.Replace"] == "true"
-          result << a
-          
           x += 1
         end
-        result
+        result_attrs
+      end
+      
+      def readExpected2Array(params)
+        result_expected = []
+        x = 0
+        while params["Expected.#{x}.Name"]
+          name = params["Expected.#{x}.Name"]
+          value = params["Expected.#{x}.Value"]
+          exists = params["Expected.#{x}.Exists"]
+          a = {}
+          a[:name] = name
+          a[:exists] = true if exists == "true"
+          a[:value] = value if a[:exists]
+          result_expected << a
+          x += 1
+        end
+        result_expected
       end
 
       def readBatchAttrs2Array(params)
