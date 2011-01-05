@@ -36,7 +36,7 @@ Spork.prefork do
   #require 'spec/interop/test'
   require 'database_cleaner'
   require 'support/blueprints'
-  Dir["#{File.dirname(__FILE__)}/helper/*.rb"].each {|r| require r }
+  Dir["#{File.dirname(__FILE__)}/ext/*.rb"].each {|r| require r }
   
   # set test environment
   set :environment, :test
