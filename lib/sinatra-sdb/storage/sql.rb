@@ -61,8 +61,9 @@ module SDB
           u = findUserByAccessKey(args[:key])
           d = u.domains.find_by_name(args[:domainName])
           item = d.items.find_by_name(args[:itemName])
-          if verifyExpectedValue(item, args[:expecteds])
-            Attr.transaction do
+          Attr.transaction do
+            item = Item.create(:name => args[:itemName], :domain => d) if item.blank?
+            if verifyExpectedValue(item, args[:expecteds])
               updateItemAttrs(item, args[:attributes])
             end
           end
@@ -143,7 +144,6 @@ module SDB
         end
   
         def updateItemAttrs(item, attributes)
-          item = Item.create(:name => itemName, :domain => domain) if item.blank?
           attributes.each do |a|
             if a[:replace]
               need_del_attrs = item.attrs.find_all_by_name(a[:name])
@@ -154,12 +154,13 @@ module SDB
         end
   
         def verifyExpectedValue(item, expecteds)
+          return true if expecteds.blank?
           expecteds.each do |e|
             attrs = item.attrs.find_all_by_name(e[:name])
             if e[:exists]
               return false if attrs.blank?
             else
-              return false if attrs[0].value != e[:value]
+              return false if attrs[0].content != e[:value]
             end
           end
           true

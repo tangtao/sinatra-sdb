@@ -4,6 +4,7 @@ module SDB
       def initialize(render, storage)
         @render = render
         @storage = storage
+        @parambuilder = ParamBuilder.new
         @paramchecker = ParamCheck.new
         @versions = {"2007-11-07" => ["CreateDomain","DeleteDomain","ListDomains",
                                         "DomainMetadata", "GetAttributes","PutAttributes","BatchPutAttributes",
@@ -21,7 +22,8 @@ module SDB
           checkVersion(params)
           checkSignature(params)
           action = params[:Action]
-          result = @paramchecker.send(action, params)
+          result = @parambuilder.send(action, params)
+          @paramchecker.send(action, result)
           result = @storage.send(action, result)
           @render.send(action, result)
         

@@ -1,155 +1,53 @@
 module SDB
 
   class ParamCheck
-      def initialize()
+
+      def CreateDomain(args)
+        verifyDomainName(args[:domainName])
       end
 
-      def CreateDomain(params)
-        result = {}
-        result[:key] = params[:AWSAccessKeyId]
-        result[:domainName] = params[:DomainName]
-        verifyDomainName(result[:domainName])
-        result
+      def DeleteDomain(args)
+        CreateDomain(args)
       end
 
-      def DeleteDomain(params)
-        CreateDomain(params)
+      def ListDomains(args)
       end
 
-      def ListDomains(params)
-        {:key => params[:AWSAccessKeyId]}
+      def DomainMetadata(args)
+        CreateDomain(args)
       end
 
-      def DomainMetadata(params)
-        CreateDomain(params)
+      def GetAttributes(args)
+        verifyDomainName(args[:domainName])
+        verifyItemName(args[:itemName])
       end
 
-      def GetAttributes(params)
-        result = {}
-        result[:key] = params[:AWSAccessKeyId]
-        result[:domainName] = params[:DomainName]
-        verifyDomainName(result[:domainName])
-        result[:itemName] = params[:ItemName]
-        verifyItemName(result[:itemName])
-        result[:attributeNames] = readAttrNames2Array(params)
-        result
+      def PutAttributes(args)
+        verifyDomainName(args[:domainName])
+        verifyItemName(args[:itemName])
       end
 
-      def PutAttributes(params)
-        result = {}
-        result[:key] = params[:AWSAccessKeyId]
-        result[:domainName] = params[:DomainName]
-        verifyDomainName(result[:domainName])
-        result[:itemName] = params[:ItemName]
-        verifyItemName(result[:itemName])
-        result[:attributes] = readAttrs2Array(params)
-        result[:expecteds] = readExpected2Array(params)
-        result
-      end
-
-      def BatchPutAttributes(params)
-        result = {}
-        result[:key] = params[:AWSAccessKeyId]
-        result[:domainName] = params[:DomainName]
-        verifyDomainName(result[:domainName])
-        result[:items_attrs] = readBatchAttrs2Array(params)
-        result
+      def BatchPutAttributes(args)
+        verifyDomainName(args[:domainName])
       end
       
-      def DeleteAttributes(params)
-        PutAttributes(params)
+      def DeleteAttributes(args)
+        PutAttributes(args)
       end
 
-      def Query(params)
-        result = {}
-        result[:key] = params[:AWSAccessKeyId]
-        result[:domainName] = params[:DomainName]
-        verifyDomainName(result[:domainName])
-        result[:queryExpression] = params[:QueryExpression]
-        result
+      def Query(args)
+        verifyDomainName(args[:domainName])
       end
 
-      def QueryWithAttributes(params)
-        result = Query(params)
-        result[:attributeNames] = readAttrNames2Array(params)
-        result
+      def QueryWithAttributes(args)
+        result = Query(args)
       end
 
-      def Select(params)
-        result = {}
-        result[:key] = params[:AWSAccessKeyId]
-        result[:selectExpression] = params[:SelectExpression]
-        result
+      def Select(args)
       end
       
       private
       
-      def readAttrs2Array(params)
-        result_attrs = []
-        x = 0
-        while params["Attribute.#{x}.Name"]
-          name = params["Attribute.#{x}.Name"]
-          value = params["Attribute.#{x}.Value"]
-          a = result_attrs.detect {|i| i[:name] == name}
-          if a.blank?
-            a = {:name => name, :value => Set.new(value)}
-            result_attrs << a
-          else
-            a[:value] << value
-          end
-          a[:replace] = true if params["Attribute.#{x}.Replace"] == "true"
-          x += 1
-        end
-        result_attrs
-      end
-      
-      def readExpected2Array(params)
-        result_expected = []
-        x = 0
-        while params["Expected.#{x}.Name"]
-          name = params["Expected.#{x}.Name"]
-          value = params["Expected.#{x}.Value"]
-          exists = params["Expected.#{x}.Exists"]
-          a = {}
-          a[:name] = name
-          a[:exists] = true if exists == "true"
-          a[:value] = value if a[:exists]
-          result_expected << a
-          x += 1
-        end
-        result_expected
-      end
-
-      def readBatchAttrs2Array(params)
-        result = []
-        y = 0
-        while params["Item.#{y}.ItemName"]
-          x = 0
-          item_attrs = []
-          while params["Item.#{y}.Attribute.#{x}.Name"]
-            a = {:name => params["Item.#{y}.Attribute.#{x}.Name"],
-                 :value => params["Item.#{y}.Attribute.#{x}.Value"]}
-            a[:replace] = true if params["Item.#{y}.Attribute.#{x}.Replace"] == "true"
-            item_attrs << a
-            
-            x += 1
-          end
-          result << [params["Item.#{y}.ItemName"], item_attrs]
-          y += 1
-        end
-        result
-      end
-
-      def readAttrNames2Array(params)
-        result = []
-        x = 1
-        while params["AttributeName.#{x}"]
-          result << params["AttributeName.#{x}"]
-          x += 1
-        end
-        result
-      end
-
       def verifyDomainName(domainName)
         raise Error::MissingParameter_DomainName.new if domainName.blank?
         if domainName =~ /[^\w\-\.]/ or domainName.size < 3 or domainName.size > 255

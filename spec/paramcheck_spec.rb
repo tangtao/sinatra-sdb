@@ -8,15 +8,15 @@ describe "ParamCheck" do
 
   describe "DomainName" do
     it "too short" do
-      params = {:DomainName => 'zz'}
+      params = {:domainName => 'zz'}
       expect{@pchecker.CreateDomain(params)}.to raise_error(SDB::Error::InvalidParameterValue_DomainName)
     end
     it "too long" do
-      params = {:DomainName => 'z'*260}
+      params = {:domainName => 'z'*260}
       expect{@pchecker.CreateDomain(params)}.to raise_error(SDB::Error::InvalidParameterValue_DomainName)
     end
     it "invalid char" do
-      params = {:DomainName => "azqw123*"}
+      params = {:domainName => "azqw123*"}
       expect{@pchecker.CreateDomain(params)}.to raise_error(SDB::Error::InvalidParameterValue_DomainName)
     end
     it "no domainName" do
