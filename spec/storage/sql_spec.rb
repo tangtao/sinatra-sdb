@@ -64,4 +64,87 @@ describe "SQL Storage" do
 
   end
 
+  describe "DeleteAttributes" do
+    
+    it "Delete attrs with specify attr_name" do
+      args = {:key => @user.key,
+              :domainName => @domain.name,
+              :itemName => @item1.name,
+              :attributes => [{:name => @attr1_2.name}] }
+      
+      @storage.DeleteAttributes(args)
+      
+      @item1.attrs.count.should == 1
+      @item1.attrs[0].name.should == @attr1_1.name
+    end
+
+    it "Delete attrs with specify attr_name and attr_value" do
+      args = {:key => @user.key,
+              :domainName => @domain.name,
+              :itemName => @item1.name,
+              :attributes => [{:name => @attr1_2.name, :value => Set.new(@attr1_2.content)}] }
+      
+      @storage.DeleteAttributes(args)
+      
+      @item1.attrs.count.should == 2
+      @item1.attrs.map{|a|a.content}.should include(@attr1_1.content,@attr1_2x.content)
+    end
+
+    it "Delete attrs with expected" do
+      args = {:key => @user.key,
+              :domainName => @domain.name,
+              :itemName => @item1.name,
+              :attributes => [{:name => @attr1_2.name, :value => Set.new(@attr1_2.content)}],
+              :expecteds =>  [{:name => @attr1_1.name, :value => @attr1_1.content, :exists => false}]
+             }
+      
+      @storage.DeleteAttributes(args)
+      
+      @item1.attrs.count.should == 2
+      @item1.attrs.map{|a|a.content}.should include(@attr1_1.content,@attr1_2x.content)
+    end
+
+    it "Delete all attrs with a item, item should be deleted" do
+      args = {:key => @user.key,
+              :domainName => @domain.name,
+              :itemName => @item1.name,
+              :attributes => [{:name => @attr1_1.name},{:name => @attr1_2.name}]
+             }
+      
+      @storage.DeleteAttributes(args)
+      
+      @domain.items.count.should == 0
+    end
+
+    it "direct Delete a item" do
+      args = {:key => @user.key,
+              :domainName => @domain.name,
+              :itemName => @item1.name
+             }
+      
+      @storage.DeleteAttributes(args)
+      
+      @domain.items.count.should == 0
+    end
+  end
+
+  describe "DomainMetadata" do
+    it "get data" do
+      args = {:key => @user.key,
+              :domainName => @domain.name
+             }
+      
+      r = @storage.DomainMetadata(args)
+      
+      r["ItemCount"].should == 1
+      r["ItemNamesSizeBytes"].should == @item1.name.size
+      r["AttributeNameCount"].should == 2
+      r["AttributeNamesSizeBytes"].should == @attr1_1.name.size + @attr1_2.name.size
+      r["AttributeValueCount"].should == 3
+      r["AttributeValuesSizeBytes"].should == (@attr1_1.content + @attr1_2.content + @attr1_2x.content).size
+      
+    end
+  end
+
+
 end

@@ -33,12 +33,28 @@ module SDB
           u = findUserByAccessKey(args[:key])
           d = u.domains.find_by_name(args[:domainName])
           
-          r = {"ItemCount" => d.items.size,
-               "ItemNamesSizeBytes" => d.items.inject{|sum,item| sum + item.name.size},
-               "AttributeNameCount" => 103,
-               "AttributeNamesSizeBytes" => 104,
-               "AttributeValueCount" => 105,
-               "AttributeValuesSizeBytes" => 106,
+          itemCount = d.items.size
+          itemNamesSizeBytes = d.items.inject(0){|sum,item| sum + item.name.size}
+          
+          attributeNameCount = 0
+          attributeNamesSizeBytes = 0
+          d.items.each do |item|
+            attr_set = Set.new(item.attrs.map{|a| a.name})
+            attributeNameCount += attr_set.count
+            attributeNamesSizeBytes += attr_set.inject(0){|sum,a| sum + a.size}
+          end
+          
+          attributeValueCount = d.items.inject(0){|sum, item| sum + item.attrs.count}
+          attributeValuesSizeBytes = d.items.inject(0) do |sum, item|
+              sum + item.attrs.inject(0){|a_sum,a| a_sum + a.content.size}
+          end
+          
+          r = {"ItemCount" => itemCount,
+               "ItemNamesSizeBytes" => itemNamesSizeBytes,
+               "AttributeNameCount" => attributeNameCount,
+               "AttributeNamesSizeBytes" => attributeNamesSizeBytes,
+               "AttributeValueCount" => attributeValueCount,
+               "AttributeValuesSizeBytes" => attributeValuesSizeBytes,
                "Timestamp" => 1225486466
               }
         end
@@ -87,16 +103,21 @@ module SDB
           d = u.domains.find_by_name(args[:domainName])
           i = d.items.find_by_name(args[:itemName])
           Attr.transaction do
-            args[:attributes].each do |a|
-              if a[:value].present?
-                a[:value].each do |x|
-                  v = i.attrs.find_by_name_and_content(a[:name],x)
-                  raise Error::AttributeDoesNotExist(a[:name]) if v.blank?
-                  v.destroy
+            if args[:attributes].blank?
+              i.destroy
+            else
+              args[:attributes].each do |a|
+                if a[:value].present?
+                  a[:value].each do |x|
+                    v = i.attrs.find_by_name_and_content(a[:name],x)
+                    raise Error::AttributeDoesNotExist(a[:name]) if v.blank?
+                    v.destroy
+                  end
+                else
+                  Attr.destroy(i.attrs.find_all_by_name(a[:name]).map{|z| z.id})
                 end
-              else
-                Attr.destroy(i.attrs.map{|z| z.id})
               end
+              i.destroy if i.attrs.count == 0
             end
           end
         end
