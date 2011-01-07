@@ -26,7 +26,12 @@ module SDB
   
         def ListDomains(args)
           u = findUserByAccessKey(args[:key])
-          u.domains.map {|x| x.name}
+          size = args[:maxNumberOfDomains] || 100
+          token = args[:nextToken] || 0
+          domains = u.domains
+          names = domains.map{|x| x.name}.sort[token, size]
+          next_token = token+size if token+size < domains.count
+          [names, next_token]
         end
   
         def DomainMetadata(args)

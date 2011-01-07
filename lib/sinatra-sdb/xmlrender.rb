@@ -23,13 +23,15 @@ module SDB
         end
       end
 
-      def ListDomains(domains)
+      def ListDomains(args)
+        domains, token = args
         xml do |x|
           x.ListDomainsResponse do
             x.ListDomainsResult do
               domains.each do |domain|
                 x.DomainName domain
               end
+              x.NextToken token if token.present?
             end
             x.ResponseMetadata do
               x.RequestId requestId

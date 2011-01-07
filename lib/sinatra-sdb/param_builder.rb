@@ -14,7 +14,11 @@ module SDB
       end
 
       def ListDomains(params)
-        {:key => params[:AWSAccessKeyId]}
+        result = {}
+        result[:key] = params[:AWSAccessKeyId]
+        result[:maxNumberOfDomains] = params[:MaxNumberOfDomains].to_i if params[:MaxNumberOfDomains].present?
+        result[:nextToken] = params[:NextToken].to_i if params[:NextToken].present?
+        result
       end
 
       def DomainMetadata(params)
@@ -57,6 +61,8 @@ module SDB
         result[:key] = params[:AWSAccessKeyId]
         result[:domainName] = params[:DomainName]
         result[:queryExpression] = params[:QueryExpression]
+        result[:maxNumberOfItems] = params[:maxNumberOfItems].to_i if params[:maxNumberOfItems].present?
+        result[:nextToken] = params[:NextToken].to_i if params[:NextToken].present?
         result
       end
 
@@ -70,6 +76,8 @@ module SDB
         result = {}
         result[:key] = params[:AWSAccessKeyId]
         result[:selectExpression] = params[:SelectExpression]
+        result[:maxNumberOfItems] = params[:maxNumberOfItems].to_i if params[:maxNumberOfItems].present?
+        result[:nextToken] = params[:NextToken].to_i if params[:NextToken].present?
         result
       end
       
