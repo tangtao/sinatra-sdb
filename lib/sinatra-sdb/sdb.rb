@@ -35,3 +35,4 @@ curr_dir = File.dirname(__FILE__)
 %w(sql).each {|r| require "#{curr_dir}/storage/#{r}"}
 %w(errors helpers xmlrender param_builder param_check action main).each {|r| require "#{curr_dir}/#{r}"}
 %w(attr item domain user).each {|r| require "#{curr_dir}/models/#{r}"}
+%w(helpers admin).each {|r| require "#{curr_dir}/admin/#{r}"}

@@ -25,8 +25,8 @@ namespace :db do
     num_users = User.count || 0 
     if num_users == 0
       puts "** No users found, creating the `admin' user."
-      User.create :login => "admin", :name => 'admin',
-                	:email => "admin@xxxxxx.com", :created_at => Time.now, :updated_at => Time.now
+      User.create :email => "admin@admin.com", :password => "password", :is_admin => true,
+                  :created_at => Time.now, :updated_at => Time.now
     end
     
   end

@@ -1,8 +1,8 @@
 require 'machinist/active_record'
 
 User.blueprint do
-  login { "Tom#{sn}" }
   email { "tom#{sn}@email.com" }
+  password {"pass"}
   key   { "0123456789012340#{sn}" }
   secret{ "aaaaabbbbbcccccddddd111112222233333I#{sn}" }
 end

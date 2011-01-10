@@ -1,0 +1,61 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title><%= @title%> : Sinatra-SDB admin center</title>
+<meta http-equiv="content-type" content="text/xhtml; charset=utf-8" />
+<meta http-equiv="imagetoolbar" content="no" />
+<meta name="distribution" content="all" />
+<meta name="robots" content="all" />	
+<meta name="resource-type" content="document" />
+<meta name="MSSmartTagsPreventParsing" content="true" />
+
+<link rel="stylesheet" type="text/css" href="/css/a.css">
+
+</head>
+<body>
+	<div id="a">
+		<header>
+			<a href="/" title="Startseite"><strong>Sinatra-SDB</strong> Admin Center</a>
+			<p>Maybe we can do</p>
+		</header>
+		<div id="b">
+			<article>
+          <%= yield :layout %>
+			</article>
+			<aside>
+				<h4>Search</h4>
+				<form action="#" class="s">
+					<input name="search" type="text" value="Type term and hit enter...">
+				</form>
+				<nav>
+					<h4>Navigation</h4>
+					<ul>
+						<li><a href="#">Lorem</a></li>
+						<li><a href="#">Ipsum</a></li>
+						<li class="active"><a href="#">Dolor Sit</a>
+							<ul>
+								<li><a href="#">Amet</a></li>
+								<li><a href="#">Amet</a></li>
+							</ul>
+					
+						</li>
+						<li><a href="#">Downloads</a></li>
+						<li><a href="#">Contact</a></li>
+					</ul>
+				</nav>
+				<h4>About the Author</h4>
+				<div id="c">
+					<p>Hi, my name is <a href="http://www.jabz.info/contact/jonas-jared-jacek/">Jonas Jacek</a>.<br> Welcome to my new HTML5 / CSS3 blog.</p>
+					<p>I am a web designer, web developer and Internet marketing enthusiast.</p>
+					<p>I strongly believe in open-source software and open standards.</p>
+				</div>
+			</aside>
+		</div>
+		<footer>
+			<p>Template Design &amp; Markup by <a href="http://www.jabz.info/contact/jonas-jared-jacek/" title="Profile of Jonas Jacek">Jonas Jacek</a> for <a href="http://www.owmx.com/" title="Free HTML5 &amp; CSS3 Web Template | owmx.com">Free HTML5 &amp; CSS3 Web Templates</a>.</p>
+		</footer>
+	</div>
+</body>
+
+</html>
