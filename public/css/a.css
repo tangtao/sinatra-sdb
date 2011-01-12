@@ -66,7 +66,7 @@ header {
 	-moz-border-radius : 4px;
 	-webkit-border-radius : 4px;
 	background : #0098CC url(../i/hd.jpg) no-repeat top left;
-	height : 123px;
+	height : 90px;
 	margin : 0 0 10px 0;
 	padding : 10px 10px;
 	position : relative;
@@ -78,19 +78,53 @@ header {
 	header a:hover {
 		color : #FFF;
 	}
-	header p {
-		-moz-border-radius : 4px;
-		-webkit-border-radius : 4px;
-		background : #FFF;
-		bottom : 20px;
-		color : #000;
-		font-weight : bold;
-		opacity : 0.5;
-		padding : 10px;
-		position : absolute;
-		right : 20px;
-		width : 400px;
+
+	#banner nav {
+		background: #000305;
+		font-size: 1.143em;
+		height: 30px;
+		line-height: 10px;
+		margin: 0 auto 0 auto;
+		padding: 0;
+		text-align: center;
+		width: 800px;
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		
+		border-radius: 5px;
+		-moz-border-radius: 5px;
+		-webkit-border-radius: 5px;
 	}
+	
+	#banner nav ul {list-style: none; margin: 0 auto; width: 800px;}
+	#banner nav li {float: left; display: inline; margin: 0;}
+	
+	#banner nav a:link, #banner nav a:visited {
+		color: #fff;
+		display: inline-block;
+		height: 30px;
+		padding: 5px 1.5em;
+		text-decoration: none;
+	}
+	#banner nav a:hover, #banner nav a:active,
+	#banner nav .active a:link, #banner nav .active a:visited {
+		background: #C74451;
+		color: #fff;
+		text-shadow: none !important;
+		height: 20px;
+	}
+	
+	#banner nav li:first-child a {
+		border-top-left-radius: 5px;
+		-moz-border-radius-topleft: 5px;
+		-webkit-border-top-left-radius: 5px;
+		
+		border-bottom-left-radius: 5px;
+		-moz-border-radius-bottomleft: 5px;
+		-webkit-border-bottom-left-radius: 5px;
+	}
+
 
 /* Article */
 article {
@@ -309,87 +343,29 @@ aside {
 	}
 
 /* Navigation & Menu */
-nav ul {
+aside nav ul {
 	list-style : none;
 	}
-	nav li {
+	aside nav li {
 		background : url(../i/ai1.png) no-repeat 0 8px;
 		padding : 0 0 0 15px;
 	}
-	nav li ul, aside li ul li ul {
+	aside nav li ul, aside li ul li ul {
 		margin : 0;
 	}
-	nav li li a {
+	aside nav li li a {
 		font-size : 11px;
 	}
-	nav li li li a {
+	aside nav li li li a {
 		font-size : 10px;
 		}
-	nav li li li, aside li.active li li {
+	aside nav li li li, aside li.active li li {
 		background : url(../i/ai8.png) no-repeat 0 10px;
 	}
-	nav li.active, aside li.active li {
+	aside nav li.active, aside li.active li {
 		background : url(../i/ai2.png) no-repeat 0 8px;
 	}
 
-/* Gallery */
-.gallery {  
-	list-style : none;
-	margin : 0 0 10px;
-	}
-	.gallery li {
-		display: inline;
-		margin : 0 15px 0 0;
-	}
-	.gallery a img {
-		border : 1px solid #999;
-		height : 50px;
-		opacity: 0.8;
-		padding : 1px;
-		width : 50px;
-	}
-	.gallery li:last-child {
-		margin : 0 0 10px 0;
-	}
-	.gallery a img:hover{
-		opacity: 1;
-	}
-	
-/* Ad Space */
-.adspace {
-	-moz-border-radius : 4px;
-	-webkit-border-radius : 4px;
-	-moz-box-shadow : 0 2px 2px rgba(0,0,0,0.3);
-	-webkit-box-shadow : 0 2px 2px rgba(0,0,0,0.3);
-	background : #EEE;
-	height : 100%;
-	margin : 0 0 20px 0;
-	padding : 5px 10px;
-	text-align : center;
-	width : 178px;
-	}
-	.adspace a img {
-		border : none;
-	}
-
-/* Tag Cloud */
-#tagcloud {
-	overflow : hidden;
-	width : 200px;
-	}
-	#tagcloud li {
-	display : inline;
-	margin : 0 10px 0 0;
-	}
-		.tagcloudsize-1 a {
-			font-size : 14px;
-		}
-		.tagcloudsize-2 a {
-			font-size : 16px;
-		}
-		.tagcloudsize-3 a {
-			font-size : 18px;
-		}
 
 /* Footer */
 footer {
@@ -422,7 +398,7 @@ footer {
 	}
 
 /* Shadow-Boxes*/
-#c, .meta, .s, nav ul {
+#c, .meta, .s, aside nav ul {
 	-moz-border-radius : 4px;
 	-webkit-border-radius : 4px;
 	-moz-box-shadow : 0 2px 2px rgba(0,0,0,0.4);
@@ -455,10 +431,10 @@ footer {
 			font-size : 10px;
 			margin : 0;
 		}
-	nav ul {
+	aside nav ul {
 			padding : 10px;
 		}
-		nav ul ul {
+		aside nav ul ul {
 			-moz-border-radius : none;
 			-webkit-border-radius : none;
 			-moz-box-shadow : none;

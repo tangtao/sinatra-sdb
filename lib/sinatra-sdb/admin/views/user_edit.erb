@@ -1,0 +1,16 @@
+<h1>Edit User</h1>
+<form method="POST" action="/admin/users/<%= @user.id%>">
+<input type="hidden" name="_method" value="put" />
+<label>Email</label>
+<input name="u[email]" type="text" value="<%= @user.email%>" disabled />
+<label>new Password</label>
+<input name="u[password]" type="password" />
+<label>Confirm Password</label>
+<input name="u[password_confirmation]" type="password" />
+<label>Key</label>
+<input name="u[key]" type="text" value="<%= @user.key%>" disabled />
+<label>Secret</label>
+<input name="u[key]" type="text" value="<%= @user.secret%>" disabled />
+<br />
+<input class="button" type="submit" value="Submit" />
+</form>

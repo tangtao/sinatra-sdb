@@ -1,2 +1,61 @@
-<h4>Home</h1>
-current user: <%= session.inspect %>
+<h3>User Info</h3>
+<table>
+	<caption>Current User Info</caption>
+	<tbody>
+		<tr>
+			<th>name</th>
+			<th>info</th>
+		</tr>
+		<tr>
+			<td>email</td>
+			<td>
+			  <%= @user.email %>
+			</td>
+		</tr>
+		<tr>
+			<td>is admin</td>
+			<td>
+			  <%= @user.is_admin %>
+			</td>
+		</tr>
+		<tr>
+			<td>key</td>
+			<td>
+			  <%= @user.key %>
+			</td>
+		</tr>
+		<tr>
+			<td>secret</td>
+			<td>
+			  <%= @user.secret %>
+			</td>
+		</tr>
+		<tr>
+			<td>create time</td>
+			<td>
+			  <%= @user.created_at %>
+			</td>
+		</tr>
+
+	</tbody>
+</table>
+
+<h3>Data Statistics</h3>
+<table>
+	<caption>Data Statistics</caption>
+	<tbody>
+		<tr>
+			<th>Domain Name</th>
+			<th>Meta</th>
+		</tr>
+		<% @domains.each do |domain,item| %>
+		<tr>
+			<td><%= domain %></td>
+			<td>
+			  item count: <%= item['ItemCount'] %> <br />
+			  attr name count: <%= item['AttributeNameCount'] %> <br />
+			</td>
+		</tr>
+		<% end %>
+	</tbody>
+</table>

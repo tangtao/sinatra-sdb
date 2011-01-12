@@ -6,11 +6,6 @@ module SDB
       redirect '/admin/login' if @user.blank?
     end
 
-    def password_digest(key, salt)
-      outer = Digest::SHA1.digest(key + salt)
-      return Base64::encode64(outer).chomp
-    end
-
     def r(name, title, layout = :layout)
       @title = title
       erb name, :layout => layout

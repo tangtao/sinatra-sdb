@@ -1,0 +1,30 @@
+<h1>All Users</h1>
+<table>
+	<caption>All Users List</caption>
+	<tbody>
+		<tr>
+			<th>User Name</th>
+			<th>Info</th>
+			<th>Edit</th>
+			<th>Delete</th>
+		</tr>
+		<% @users.each do |u| %>
+		<tr>
+			<td><%= u.email %></td>
+			<td>
+			  <%= u.domains.count %>
+			</td>
+			<td>
+			  <a href="/admin/users/<%= u.id%>/edit">edit</a>
+			</td>
+			<td>
+        <form method="post" action="/admin/users/<%= u.id%>">
+          <input type="hidden" name="_method" value="delete" />
+          <button type="submit">Destroy</button>
+        </form>
+			</td>
+
+		</tr>
+		<% end %>
+	</tbody>
+</table>

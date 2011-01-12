@@ -7,7 +7,7 @@
 :test:
   :public_path: public
   :db:
-    :database: db/test.sqlite
+    :database: db/development.sqlite
     :adapter: sqlite3
 
 :production:
