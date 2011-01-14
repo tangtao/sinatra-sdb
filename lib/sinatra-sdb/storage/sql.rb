@@ -93,6 +93,7 @@ module SDB
         def BatchPutAttributes(args)
           u = findUserByAccessKey(args[:key])
           d = u.domains.find_by_name(args[:domainName])
+          raise Error::NoSuchDomain.new if d.blank?
           Attr.transaction do
             args[:items_attrs].each do |i|
               itemName, attributes = i

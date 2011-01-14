@@ -11,6 +11,7 @@ module SDB
 
     configure do
       ActiveRecord::Base.establish_connection(SDB.config[:db])
+      #ActiveRecord::Base.logger = Logger.new(STDOUT)
     end
 
     configure(:development, :test) do

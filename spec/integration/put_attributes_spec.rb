@@ -76,6 +76,26 @@ describe "PutAttributes Action" do
       @item.attrs.map{|a|a.content}.should include(attr1x.content,attr1y.content)
     end
 
+    it "Simple Put with replace and expecteds" do
+      
+      attr1 = Attr.make!(:item => @item)
+      attr1x = Attr.make(:item => @item, :name=>attr1.name)
+      attrs = { attr1x.name => attr1x.content }
+      expecteds = {attr1.name => attr1.content}
+
+      link = @sdb.put_attributes_link_new(@domain.name, @item.name, attrs, expecteds, true)
+
+      get link
+      #pp last_response.body
+
+      last_response.should be_ok
+      @item.attrs.count.should == 1
+      @item.attrs.map{|a|a.name}.should include(attr1.name)
+      @item.attrs.map{|a|a.content}.should include(attr1x.content)
+      @item.attrs.map{|a|a.content}.should_not include(attr1.content)
+    end
+
+
   end
 
 end

@@ -112,7 +112,7 @@ module SDB
           a = {}
           a[:name] = name
           a[:exists] = true if exists == "true"
-          a[:value] = value if a[:exists]
+          a[:value] = value unless a[:exists]
           result_expected << a
           x += 1
         end

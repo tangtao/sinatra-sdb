@@ -38,6 +38,13 @@ module RightAws
       link = generate_request("PutAttributes", params)
       link[:request].path
     end
+    def put_attributes_link_new(domain_name, item_name, attributes, expecteds=nil, replace = false)
+      params = { 'DomainName' => domain_name,
+                 'ItemName'   => item_name }.merge(pack_attributes(attributes, replace)).
+                 														 merge(pack_expecteds(expecteds))
+      link = generate_request("PutAttributes", params)
+      link[:request].path
+    end
 
     def batch_put_attributes_link(domain_name, items, replace = false)
       params = { 'DomainName' => domain_name }.merge(pack_attributes(items, replace, true))
@@ -105,6 +112,30 @@ module RightAws
       link[:request].path
     end
 
+
+    def pack_expecteds(expecteds)
+      result = {}
+      if expecteds
+        idx = 0
+        expecteds.each do |name, values|
+          # pack Name/Value
+          unless values.nil?
+            # Array(values) does not work here:
+            #  - Array('') => [] but we wanna get here ['']
+            [values].flatten.each do |value|
+              result["Expected.#{idx}.Name"]  = name
+              result["Expected.#{idx}.Value"] = ruby_to_sdb(value)
+              idx += 1
+            end
+          else
+            result["Expected.#{idx}.Name"] = name
+            result["Expected.#{idx}.Value"] = ruby_to_sdb(nil)
+            idx += 1
+          end
+        end
+      end
+      result
+    end
   end
   
 end
