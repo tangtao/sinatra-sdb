@@ -10,7 +10,7 @@ module SDB
 
     def getSdb(user)
       logger = Logger.new('/dev/null')
-      params = {:server => 'localhost', :logger => logger}
+      params = {:server => 'example.org', :logger => logger}
       sdb = RightAws::SdbInterface.new(user.key, user.secret, params)
     end
 

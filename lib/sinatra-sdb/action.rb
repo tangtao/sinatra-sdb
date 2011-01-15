@@ -17,10 +17,10 @@ module SDB
                                         
       end
           
-      def runAction(params)
+      def runAction(params,request)
         begin
           checkVersion(params)
-          checkSignature(params)
+          checkSignature(params,request)
           action = params[:Action]
           result = @parambuilder.send(action, params)
           @paramchecker.send(action, result)
@@ -35,8 +35,25 @@ module SDB
 
     private
     
-    def checkSignature(params)
-      strOldSignature = params[:Signature]
+    def checkSignature(params,request)
+      strClientSignature = params[:Signature]
+      service_hash = createServiceHash(params)
+      strSignature = Helpers::AwsUtils.genrate_signature_v2(find_secret_by_access_key(params[:AWSAccessKeyId]),
+                                                  service_hash,
+                                                  "GET", request.host, request.path_info)
+      
+      if strClientSignature != strSignature
+        raise ServiceError.new("AuthFailure")
+      end
+    end
+    
+    def checkVersion(params)
+      unless @versions[params[:Version]].include?(params[:Action])
+        raise ServiceError.new("AuthFailure")
+      end
+    end
+
+    def createServiceHash(params)
       service_hash = {"Action" => params[:Action],
                       "Version" => params[:Version],
                       "AWSAccessKeyId" => params[:AWSAccessKeyId],
@@ -49,23 +66,7 @@ module SDB
       end
       
       service_hash.merge!(filterAttrs(params))
-      
-      #pp service_hash
-      strSignature = Helpers::AwsUtils.genrate_signature_v2(find_secret_by_access_key(params[:AWSAccessKeyId]),
-                                                  service_hash,
-                                                  "GET", "localhost", "/")
-      #pp strOldSignature
-      #pp strSignature
-      
-      if strOldSignature != strSignature
-        raise ServiceError.new("AuthFailure")
-      end
-    end
-    
-    def checkVersion(params)
-      unless @versions[params[:Version]].include?(params[:Action])
-        raise ServiceError.new("AuthFailure")
-      end
+      service_hash
     end
     
     def find_secret_by_access_key(key)

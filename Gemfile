@@ -8,6 +8,7 @@ gem 'uuidtools'
 gem 'foreverman-dhaka', :git => "git://github.com/foreverman/dhaka.git" , :require => "dhaka"
 gem 'sqlite3-ruby'
 gem 'right_aws'
+#gem 'right_aws', :path => File.join(File.dirname(__FILE__), '..', 'lib', 'tangtao_right_aws')
 gem 'nokogiri'
 gem 'haml'
 #gem 'mysql'

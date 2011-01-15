@@ -20,7 +20,8 @@ module SDB
     end
 
     get '/' do
-      settings.myaction.runAction(params)
+      #pp request
+      settings.myaction.runAction(params,request)
     end
 
   end
