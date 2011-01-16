@@ -28,4 +28,11 @@ sinatra-sdb is an implementation of Amazon's SimpleDB REST API.
 Once Sinatra-SDB has been installed we can start our server
 
   rackup -p 7000
+  
+== ADMIN
 
+login http://localhost:7000/admin
+user: admin@admin.com
+password: password
+
+Now, you can manager account info
