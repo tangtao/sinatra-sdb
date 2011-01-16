@@ -13,13 +13,13 @@ spec = Gem::Specification.new do |s|
   s.homepage = "http://github.com/tangtao/sinatra-sdb"
   s.platform = Gem::Platform::RUBY
   s.summary = "An implementation of the Amazon SimpleDB API in Ruby"
-  s.files = FileList["{bin,lib,public,examples}/**/*"].to_a +
+  s.files = FileList["{lib,public}/**/*"].to_a +
     FileList["db/migrate/*"].to_a +
     ["Rakefile","sinatra-sdb.yml.example"]
   s.require_path = "lib"
   s.description = File.read("README")
   s.executables = ['sinatra-sdb']
-  s.test_files = FileList["{test}/*.rb"].to_a
+  s.test_files = FileList["{spec}/*.rb"].to_a
   s.has_rdoc = false
   s.extra_rdoc_files = ["README"]
   s.add_dependency("sinatra", ">= 1.0")

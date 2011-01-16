@@ -1,21 +1,28 @@
-Sinatra-SDB is an implementation of the Amazon SimpleDB API.  Based on the
-Parkplace, written by _why, Sinatra-SDB provide full '2007-11-07' and '2009-4-15' 
-versions API interface. Sinatra-SDB use SQL DB(with ActiveRecord) sotre Data,now.
+sinatra-sdb
+    by tangtao (tangtao@gmail.com)
+
+== DESCRIPTION:
+  
+sinatra-sdb is an implementation of Amazon's SimpleDB REST API.
+
+== FEATURES:
+  
+* Implements the current 2007-11-07 and 2009-04-15 SimpleDB REST API versions.
+* Support multi-Database (by ActiveRecord).
 
 
-Install
-------------------------------------------------------------------
-
-We could install from github
+== INSTALL:
 
   git clone git://github.com/tangtao/sinatra-sdb.git
   cd sinatra-sdb/
-  cp sinatra-sdb.yml.example sinatra-sdb.yml
   bundle install
   rake db:migrate
 
+== TEST:
 
-Setup
+  rspec spec/
+
+== RUN:
 ------------------------------------------------------------------
 
 Once Sinatra-SDB has been installed we can start our server

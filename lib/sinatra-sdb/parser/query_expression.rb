@@ -1,6 +1,7 @@
 require 'set'
 
 module SDB
+  #from simplerdb
   # Uses the lexer/parser/evaluator to perform the query and do simple paging
   class QueryExecutor < BaseExecutor
 

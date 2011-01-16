@@ -1,17 +1,14 @@
 :development:
-  :public_path: public
   :db:
     :database: db/development.sqlite
     :adapter: sqlite3
 
 :test:
-  :public_path: public
   :db:
     :database: db/development.sqlite
     :adapter: sqlite3
 
 :production:
-  :public_path: public
   :db:
     :database: db/production.sqlite
     :adapter: sqlite3

@@ -1,14 +1,13 @@
 module SDB
   module Helpers
-    class AwsUtils #:nodoc:
+    #from right_aws
+    class AwsUtils
       @@digest1   = OpenSSL::Digest::Digest.new("sha1")
       @@digest256 = nil
       if OpenSSL::OPENSSL_VERSION_NUMBER > 0x00908000
         @@digest256 = OpenSSL::Digest::Digest.new("sha256") rescue nil # Some installation may not support sha256
       end
       
-      # Escape a string accordingly Amazon rulles
-      # http://docs.amazonwebservices.com/AmazonSimpleDB/2007-11-07/DeveloperGuide/index.html?REST_RESTAuth.html
       def self.amz_escape(param)
         param.to_s.gsub(/([^a-zA-Z0-9._~-]+)/n) do
           '%' + $1.unpack('H2' * $1.size).join('%').upcase

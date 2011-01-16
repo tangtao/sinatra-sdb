@@ -194,6 +194,7 @@ module SDB
         UUIDTools::UUID.random_create.to_s
       end
       
+      #TODO
       def boxUsage
         '0.0000219907'
       end
