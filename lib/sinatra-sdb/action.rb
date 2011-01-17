@@ -43,13 +43,13 @@ module SDB
                                                   "GET", request.host, request.path_info)
       
       if strClientSignature != strSignature
-        raise ServiceError.new("AuthFailure")
+        raise Error::AuthFailure.new
       end
     end
     
     def checkVersion(params)
       unless @versions[params[:Version]].include?(params[:Action])
-        raise ServiceError.new("AuthFailure")
+        raise Error::NoSuchVersion.new
       end
     end
 
