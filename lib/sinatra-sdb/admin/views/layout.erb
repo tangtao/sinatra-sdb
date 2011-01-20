@@ -31,7 +31,12 @@
 		</header>
 		<div id="b">
 			<article>
-          <%= yield :layout %>
+			  <% if flash[:error] %>
+  		  <p class="highlight-1">
+  		    <%= flash[:error] %>
+  		  </p>
+  		  <% end %>
+        <%= yield :layout %>
 			</article>
 			<aside>
 				<nav>

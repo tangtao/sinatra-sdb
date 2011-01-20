@@ -1,4 +1,5 @@
 require "sinatra/reloader"
+require "sinatra/flash"
 require 'erb'
 
 module SDB
@@ -13,6 +14,7 @@ module SDB
 
     set :views, File.dirname(__FILE__) + '/views'
     enable :sessions
+    register Sinatra::Flash
     set :storage, Storage::SQL.new
 
     before do
@@ -39,12 +41,14 @@ module SDB
         redirect '/admin/home'
       else
         @user = User.new
-        @user.errors.add(:login, 'not found')
+        flash[:error] = "login error!"
+        redirect '/admin/login'
       end
     end
 
     get '/admin/logout' do
       session[:user_id] = nil
+      flash[:error] = "login out."
       redirect '/admin/home'
     end
 
@@ -63,34 +67,41 @@ module SDB
 
     get '/admin/users/new' do
       login_required
+      login_only_admin
       r :user_new, "new User"
     end
 
     post '/admin/users' do
+      login_required
+      login_only_admin
       @user = User.create(:email => params[:email], :password => params[:password])
       redirect '/admin/users'
     end
 
     get '/admin/users/?' do
       login_required
+      login_only_admin
       @users = User.find(:all)
       r :user_index, "List Users"
     end
 
     get '/admin/users/:id/edit' do
       login_required
+      login_only_admin_and_curr_user(params[:id])
       @user = User.find(params[:id])
       r :user_edit, "Edit User"
     end
 
     delete '/admin/users/:id' do
       login_required
+      login_only_admin
       User.destroy(params[:id])
       redirect '/admin/users'
     end
 
     put '/admin/users/:id' do
       login_required
+      login_only_admin_and_curr_user(params[:id])
       @user = User.find(params[:id])
       @user.attributes = params[:u]
       @user.save
