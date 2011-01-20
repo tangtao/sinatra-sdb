@@ -5,7 +5,7 @@
 
 :test:
   :db:
-    :database: db/development.sqlite
+    :database: db/test.sqlite
     :adapter: sqlite3
 
 :production:

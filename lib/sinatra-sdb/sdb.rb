@@ -18,13 +18,13 @@ module SDB
   SDB_ENV = ENV['SDB_ENV'] || 'development'
   
 
-  def self.config
-    @config ||= YAML.load_file("sinatra-sdb.yml")[SDB_ENV.to_sym] rescue { 
-          :db => { :adapter => 'sqlite3', :database => "db/sdb.sqlite" }
-    }
+  def self.config(run_env=nil)
+    env = run_env || SDB_ENV
+    @config ||= YAML.load_file("sinatra-sdb.yml")
+    @config[env.to_sym]
   end
 
-  VERSION = "0.01"
+  VERSION = "0.10"
 
   ROOT_DIR = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
   PUBLIC_PATH = File.expand_path(SDB.config[:public_path] || File.join(ROOT_DIR, 'public'))

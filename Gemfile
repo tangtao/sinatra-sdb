@@ -1,6 +1,7 @@
 source 'http://rubygems.org'
 
 gem 'sinatra'
+gem 'sinatra-flash'
 #gem 'sinatra-rest'
 gem 'activerecord', '>= 3.0.0'
 gem 'builder'

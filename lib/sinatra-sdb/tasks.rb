@@ -3,6 +3,7 @@ require 'rake/testtask'
 require 'rake/gempackagetask'
 require 'active_record'
 require 'logger'
+require 'fileutils'
 
 require File.join(File.dirname(__FILE__), 'sdb')
 
@@ -28,6 +29,8 @@ namespace :db do
       User.create :email => "admin@admin.com", :password => "password", :is_admin => true,
                   :created_at => Time.now, :updated_at => Time.now
     end
+    
+    FileUtils.cp SDB.config[:db][:database], SDB.config('test')[:db][:database]
     
   end
 end

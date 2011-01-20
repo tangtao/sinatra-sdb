@@ -5,7 +5,7 @@ class CreateUsers < ActiveRecord::Migration
       t.string :email, :limit => 100
       t.string :hashed_password, :limit => 100
       t.string :salt, :limit => 100
-      t.boolean :is_admin, :default => true
+      t.boolean :is_admin, :default => false
       t.string :key,        :limit => 64
       t.string :secret,     :limit => 64
       
