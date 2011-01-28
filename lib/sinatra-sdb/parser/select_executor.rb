@@ -12,7 +12,7 @@ module SDB
     end
     
     # Execute the query
-    def do_query(query, user, max = 100, token = 0)
+    def do_query(query, key, max = 100, token = 0)
       parse_result = @parser.parse(@lexer.lex(query))
       token = 0 if token.nil?
       
@@ -23,7 +23,7 @@ module SDB
           raise parse_error_message(parse_result.unexpected_token, query) 
       end
   
-      items = SelectEvaluator.new(user).evaluate(parse_result)
+      items = SelectEvaluator.new(key).evaluate(parse_result)
       return items
       
       ########################

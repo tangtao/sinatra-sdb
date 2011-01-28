@@ -21,6 +21,7 @@ describe "DeleteAttributes Action" do
       attrs = { attr1.name => attr1.content }
       
       link = sdb.delete_attributes_link(domain.name, item.name, attrs)
+      #pp link
       get link
       #pp last_response.body
       last_response.should be_ok

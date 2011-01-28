@@ -2,36 +2,98 @@ module SDB
   module Storage
     class SQL
         def initialize()
-          @query_executor = QueryExecutor.new
-          @select_executor = SelectExecutor.new
         end
   
-        def FindSecretByAccessKey(key)
+        def find_secret(key)
           u = User.find_by_key(key)
-          raise Error::AuthMissingFailure.new if u.blank?
-          u.secret
+          u.secret if u
+        end
+
+        def domains_count(key)
+          u = User.find_by_key(key)
+          u.domains.count
         end
   
-        def CreateDomain(args)
-          u = findUserByAccessKey(args[:key])
-          raise Error::NumberDomainsExceeded.new if u.domains.count > 100
-          d = Domain.find_or_create_by_user_id_and_name(u.id, args[:domainName])
+        def create_domain(key,name)
+          u = User.find_by_key(key)
+          Domain.find_or_create_by_user_id_and_name(u.id, name)
         end
   
-        def DeleteDomain(args)
-          u = findUserByAccessKey(args[:key])
-          d = u.domains.find_by_name(args[:domainName])
-          d.destroy if d.present?
+        def delete_domain(key,name)
+          u = User.find_by_key(key)
+          d = u.domains.find_by_name(name)
+          d.destroy if d
+        end
+
+        def find_domain_by_name(key,name)
+          u = User.find_by_key(key)
+          u.domains.find_by_name(name)
         end
   
-        def ListDomains(args)
-          u = findUserByAccessKey(args[:key])
-          size = args[:maxNumberOfDomains] || 100
-          token = args[:nextToken] || 0
-          domains = u.domains
-          names = domains.map{|x| x.name}.sort[token, size]
-          next_token = token+size if token+size < domains.count
-          [names, next_token]
+        def domain_name_list(key)
+          u = User.find_by_key(key)
+          u.domains.map{|x| x.name}
+        end
+
+        def get_item_attrs(key,domain_name,item_name,attr_names=nil)
+          u = User.find_by_key(key)
+          d = u.domains.find_by_name(domain_name)
+          i = d.items.find_by_name(item_name)
+          return [] if i.blank?
+          i.attrs_with_names(attr_names)
+        end
+
+        def put_one_item_attrs(key,domain_name,item_name, attributes)
+          u = User.find_by_key(key)
+          d = u.domains.find_by_name(domain_name)
+          item = d.items.find_by_name(item_name)
+          item = Item.create(:name => item_name, :domain => d) if item.blank?
+          attributes.each do |a|
+            if a[:replace]
+              need_del_attrs = item.attrs.find_all_by_name(a[:name])
+              Attr.destroy(need_del_attrs.map{|x|x.id})
+            end
+            a[:value].each { |v| Attr.create(:name => a[:name], :content => v, :item => item) }
+          end
+        end
+
+        def delete_one_item_attrs(key,domain_name,item_name, attributes)
+          u = User.find_by_key(key)
+          d = u.domains.find_by_name(domain_name)
+          i = d.items.find_by_name(item_name)
+          
+          if attributes.blank?
+            i.destroy
+          else
+            attributes.each do |a|
+              if a[:value].present?
+                a[:value].each do |x|
+                  v = i.attrs.find_by_name_and_content(a[:name],x)
+                  v.destroy if v.present?
+                end
+              else
+                Attr.destroy(i.attrs.find_all_by_name(a[:name]).map{|z| z.id})
+              end
+            end
+            i.destroy if i.attrs.count == 0
+          end
+          
+        end
+
+        def verify_expected_value(key,domain_name,item_name, expecteds)
+          return true if expecteds.blank?
+          u = User.find_by_key(key)
+          d = u.domains.find_by_name(domain_name)
+          item = d.items.find_by_name(item_name)
+          expecteds.each do |e|
+            attrs = item.attrs.find_all_by_name(e[:name])
+            if e[:exists]
+              return false if attrs.blank?
+            else
+              return false if attrs[0].content != e[:value]
+            end
+          end
+          true
         end
   
         def DomainMetadata(args)
@@ -64,70 +126,6 @@ module SDB
               }
         end
   
-        def GetAttributes(args)
-          u = findUserByAccessKey(args[:key])
-          d = u.domains.find_by_name(args[:domainName])
-          raise Error::NoSuchDomain.new if d.blank?
-          i = d.items.find_by_name(args[:itemName])
-          return [] if i.blank?
-          attr_names = args[:attributeNames]
-          if attr_names.blank?
-            i.attrs.map { |a| {:name => a.name, :value => a.content} }
-          else
-            getAttributesByNames(i, attr_names)
-          end
-        end
-  
-        def PutAttributes(args)
-          u = findUserByAccessKey(args[:key])
-          d = u.domains.find_by_name(args[:domainName])
-          item = d.items.find_by_name(args[:itemName])
-          Attr.transaction do
-            item = Item.create(:name => args[:itemName], :domain => d) if item.blank?
-            if verifyExpectedValue(item, args[:expecteds])
-              updateItemAttrs(item, args[:attributes])
-            end
-          end
-        end
-  
-        def BatchPutAttributes(args)
-          u = findUserByAccessKey(args[:key])
-          d = u.domains.find_by_name(args[:domainName])
-          raise Error::NoSuchDomain.new if d.blank?
-          Attr.transaction do
-            args[:items_attrs].each do |i|
-              itemName, attributes = i
-              item = d.items.find_by_name(itemName)
-              updateItemAttrs(item, attributes)
-            end
-          end
-        end
-        
-        #TODO we need handle del item or attr name only
-        def DeleteAttributes(args)#(key, domainName, itemName, attributes)
-          u = findUserByAccessKey(args[:key])
-          d = u.domains.find_by_name(args[:domainName])
-          i = d.items.find_by_name(args[:itemName])
-          Attr.transaction do
-            if args[:attributes].blank?
-              i.destroy
-            else
-              args[:attributes].each do |a|
-                if a[:value].present?
-                  a[:value].each do |x|
-                    v = i.attrs.find_by_name_and_content(a[:name],x)
-                    raise Error::AttributeDoesNotExist(a[:name]) if v.blank?
-                    v.destroy
-                  end
-                else
-                  Attr.destroy(i.attrs.find_all_by_name(a[:name]).map{|z| z.id})
-                end
-              end
-              i.destroy if i.attrs.count == 0
-            end
-          end
-        end
-  
         def Query(args)#(key, domainName, queryExpression)
           u = findUserByAccessKey(args[:key])
           d = u.domains.find_by_name(args[:domainName])
@@ -151,10 +149,10 @@ module SDB
   
         def Select(args)#(key, queryExpression)
           u = findUserByAccessKey(args[:key])
+          pp u
           @select_executor.do_query(args[:selectExpression], u)
         end
-  
-        
+
         private
         def findUserByAccessKey(key)
           User.find_by_key(key)
@@ -169,30 +167,54 @@ module SDB
           end
           result
         end
-  
-        def updateItemAttrs(item, attributes)
-          attributes.each do |a|
-            if a[:replace]
-              need_del_attrs = item.attrs.find_all_by_name(a[:name])
-              Attr.destroy(need_del_attrs.map{|x|x.id})
+      
+    end
+
+    class SelectSQL
+      
+        attr_writer :sort_name, :sort_order, :limit_number, :explicit_attr_names
+      
+        def initialize(key)
+          @user = User.find_by_key(key)
+          @domain = nil
+        end
+        
+        def domain=(name)
+          @domain = @user.domains.find_by_name(name)
+        end
+        
+        def all_items
+          @domain.items
+        end
+        
+        def items_sort_by_attr_name(items)
+          return items if @sort_name.blank?
+          items.sort do |a, b|
+            a1 = a.attrs.find_by_name(@sort_name)
+            b1 = b.attrs.find_by_name(@sort_name)
+            if @sort_order == :asc
+              a1.content <=> b1.content
+            else
+              b1.content <=> a1.content
             end
-            a[:value].each { |v| Attr.create(:name => a[:name], :content => v, :item => item) }
           end
         end
+
+        def items_slice(items)
+          return items if @limit_number.blank?
+          items = items.to_a
+          items[0, @limit_number]
+        end
+
+        def get_item_attrs(item)
+          item.attrs_with_names(@explicit_attr_names)
+        end
   
-        def verifyExpectedValue(item, expecteds)
-          return true if expecteds.blank?
-          expecteds.each do |e|
-            attrs = item.attrs.find_all_by_name(e[:name])
-            if e[:exists]
-              return false if attrs.blank?
-            else
-              return false if attrs[0].content != e[:value]
-            end
-          end
-          true
+        def find_all_attr_by_name(item, attr_name)
+          item.attrs.find_all_by_name(attr_name)
         end
       
     end
+
   end
 end

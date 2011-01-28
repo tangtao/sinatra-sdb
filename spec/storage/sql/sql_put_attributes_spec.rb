@@ -3,7 +3,7 @@ require File.expand_path(File.dirname(__FILE__) + '/../../spec_helper')
 describe "PutAttributes Storage" do
   
   before(:all) do
-    @storage = SDB::Storage::SQL.new
+    @store = SDB::Storage::Store.new(SDB::Storage::SQL.new)
   end
 
   before(:each) do
@@ -25,7 +25,7 @@ describe "PutAttributes Storage" do
             :itemName => iname,
             :attributes => [{:name => 'myattr_01', :value => Set.new(['v1','v2'])}] }
     
-    @storage.PutAttributes(args)
+    @store.PutAttributes(args)
     
     newItem = @domain.items.find_by_name(iname)
     newItem.attrs.count.should == 2
@@ -37,7 +37,7 @@ describe "PutAttributes Storage" do
             :itemName => @item1.name,
             :attributes => [{:name => @attr1_2.name, :value => Set.new(['v1','v2']),:replace => true}] }
     
-    @storage.PutAttributes(args)
+    @store.PutAttributes(args)
     
     @item1.attrs.count.should == 3
     attrs = @item1.attrs.find_all_by_name(@attr1_2.name)
@@ -52,7 +52,7 @@ describe "PutAttributes Storage" do
             :expecteds =>  [{:name => @attr1_1.name, :value => @attr1_1.content, :exists => false}]
            }
     
-    @storage.PutAttributes(args)
+    @store.PutAttributes(args)
     
     @item1.attrs.count.should == 3
     attrs = @item1.attrs.find_all_by_name(@attr1_1.name)

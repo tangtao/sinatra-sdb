@@ -7,7 +7,7 @@ module SDB
     disable :raise_errors, :show_exceptions
     set :environment, SDB_ENV.to_sym
     set :public, PUBLIC_PATH
-    set :myaction, Action.new(XmlRender.new, Storage::SQL.new)
+    set :myaction, Action.new(XmlRender.new, Storage::Store.new(Storage::SQL.new))
 
     configure do
       ActiveRecord::Base.establish_connection(SDB.config[:db])

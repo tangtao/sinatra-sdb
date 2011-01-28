@@ -5,43 +5,25 @@ module SDB
   class SelectEvaluator < Dhaka::Evaluator
     self.grammar = SelectGrammar
     
-    def initialize(user)
-      @user = user
-      @domain = nil
-      @sort_name = nil
-      @sort_order = nil
-      @limit_number = nil
-      @explicit_attr_names = nil
+    def initialize(key)
+      @storage = Storage::SelectSQL.new(key)
     end
     
     define_evaluation_rules do
      
       for_select_without_conditions do
         output_type = evaluate(child_nodes[1])
-        domain = evaluate(child_nodes[3])
-        output_by_type(output_type, domain.items)
+        evaluate(child_nodes[3])
+        output_by_type(output_type, @storage.all_items)
       end
 
       for_select_with_conditions do
         output_type = evaluate(child_nodes[1])
-        @domain = evaluate(child_nodes[3])
-        items = evaluate(child_nodes[4]).to_a
+        evaluate(child_nodes[3])
+        items = evaluate(child_nodes[4])
+        items = @storage.items_sort_by_attr_name(items)
+        items = @storage.items_slice(items)
         
-        if @sort_name.present?
-          items = items.sort do |a, b|
-            a1 = a.attrs.find_by_name(@sort_name)
-            b1 = b.attrs.find_by_name(@sort_name)
-            if @sort_order == :asc
-              a1.content <=> b1.content
-            else
-              b1.content <=> a1.content
-            end
-          end
-        end
-        
-        if @limit_number.present?
-          items = items[0,@limit_number]
-        end
         output_by_type(output_type, items)
       end
       
@@ -58,10 +40,14 @@ module SDB
       end
 
       for_only_sort do
-        @sort_name,@sort_order = evaluate(child_nodes[2])
+        sort_name, sort_order = evaluate(child_nodes[2])
+        @storage.sort_name = sort_name
+        @storage.sort_order = sort_order
       end
       for_with_sort do
-        @sort_name,@sort_order = evaluate(child_nodes[2])
+        sort_name, sort_order = evaluate(child_nodes[2])
+        @storage.sort_name = sort_name
+        @storage.sort_order = sort_order
         evaluate(child_nodes[3])
       end
       for_without_sort do
@@ -80,7 +66,7 @@ module SDB
       
       
       for_with_limit do
-        @limit_number = evaluate(child_nodes[1])
+        @storage.limit_number = evaluate(child_nodes[1])
       end
 
       for_limit_number do
@@ -91,7 +77,7 @@ module SDB
       for_item_name_output {:itemName}
       for_count_output {:count}
       for_explicit_attr_output do
-        @explicit_attr_names = evaluate(child_nodes[0])
+        @storage.explicit_attr_names = evaluate(child_nodes[0])
         :explicit
       end
       
@@ -104,8 +90,7 @@ module SDB
       end
 
       for_one_domain do
-        domain_name = evaluate(child_nodes[0])
-        @user.domains.find_by_name(domain_name)
+        @storage.domain = evaluate(child_nodes[0])
       end
 
       for_single_predicate do
@@ -118,7 +103,7 @@ module SDB
       
       for_not_predicates do
         results = evaluate(child_nodes[1])
-        @domain.items.to_set.difference(results)
+        @storage.all_items.to_set.difference(results)
       end
       
       for_intersection do
@@ -160,10 +145,8 @@ module SDB
       for_is_null_comparison do
         results = Set.new
         attr_name = evaluate(child_nodes[0])
-        if @domain
-          @domain.items.each do |item|
-            results << item if item.attrs.find_all_by_name(attr_name).count == 0
-          end
+        @storage.all_items.each do |item|
+          results << item if @storage.find_all_attr_by_name(item, attr_name).count == 0
         end
         results
       end
@@ -171,10 +154,8 @@ module SDB
       for_is_not_null_comparison do
         results = Set.new
         attr_name = evaluate(child_nodes[0])
-        if @domain
-          @domain.items.each do |item|
-            results << item if item.attrs.find_all_by_name(attr_name).count > 0
-          end
+        @storage.all_items.each do |item|
+          results << item if @storage.find_all_attr_by_name(item, attr_name).count > 0
         end
         results
       end
@@ -183,7 +164,7 @@ module SDB
         attr_name = evaluate(child_nodes[2])
         every_action = Proc.new do |item, op, constant|
           match = true
-          attrs = item.attrs.find_all_by_name(attr_name)
+          attrs = @storage.find_all_attr_by_name(item, attr_name)
           match = false if attrs.count == 0
           attrs.each { |attr| match = false unless op.call(constant, attr.content) }
           match
@@ -195,7 +176,7 @@ module SDB
         attr_name = evaluate(child_nodes[0])
         Proc.new do |item, op, constant|
           match = false
-          attrs = item.attrs.find_all_by_name(attr_name)
+          attrs = @storage.find_all_attr_by_name(item, attr_name)
           attrs.each { |attr| match = true if op.call(constant, attr.content) }
           match
         end
@@ -230,7 +211,7 @@ module SDB
     def output_by_type(typ, items)
       case typ
       when :all,:explicit
-        items.map { |i| [i.name, i.attrs_with_names(@explicit_attr_names)] }
+        items.map { |i| [i.name, @storage.get_item_attrs(i)] }
       when :itemName
         items.map{|i| [i.name, []]}
       when :count
@@ -242,10 +223,8 @@ module SDB
     # Apply the given comparison params to every item in the domain
     def do_comparison(item_action, op, constant)
       results = Set.new
-      if @domain
-        @domain.items.each do |item|
-          results << item if item_action.call(item, op, constant)
-        end
+      @storage.all_items.each do |item|
+        results << item if item_action.call(item, op, constant)
       end
       results
     end

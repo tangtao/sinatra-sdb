@@ -3,7 +3,7 @@ require File.expand_path(File.dirname(__FILE__) + '/../../spec_helper')
 describe "DeleteAttributes Storage" do
   
   before(:all) do
-    @storage = SDB::Storage::SQL.new
+    @store = SDB::Storage::Store.new(SDB::Storage::SQL.new)
   end
 
   before(:each) do
@@ -24,7 +24,7 @@ describe "DeleteAttributes Storage" do
             :itemName => @item1.name,
             :attributes => [{:name => @attr1_2.name}] }
     
-    @storage.DeleteAttributes(args)
+    @store.DeleteAttributes(args)
     
     @item1.attrs.count.should == 1
     @item1.attrs[0].name.should == @attr1_1.name
@@ -36,7 +36,7 @@ describe "DeleteAttributes Storage" do
             :itemName => @item1.name,
             :attributes => [{:name => @attr1_2.name, :value => Set.new(@attr1_2.content)}] }
     
-    @storage.DeleteAttributes(args)
+    @store.DeleteAttributes(args)
     
     @item1.attrs.count.should == 2
     @item1.attrs.map{|a|a.content}.should include(@attr1_1.content,@attr1_2x.content)
@@ -50,7 +50,7 @@ describe "DeleteAttributes Storage" do
             :expecteds =>  [{:name => @attr1_1.name, :value => @attr1_1.content, :exists => false}]
            }
     
-    @storage.DeleteAttributes(args)
+    @store.DeleteAttributes(args)
     
     @item1.attrs.count.should == 2
     @item1.attrs.map{|a|a.content}.should include(@attr1_1.content,@attr1_2x.content)
@@ -63,7 +63,7 @@ describe "DeleteAttributes Storage" do
             :attributes => [{:name => @attr1_1.name},{:name => @attr1_2.name}]
            }
     
-    @storage.DeleteAttributes(args)
+    @store.DeleteAttributes(args)
     
     @domain.items.count.should == 0
   end
@@ -74,7 +74,7 @@ describe "DeleteAttributes Storage" do
             :itemName => @item1.name
            }
     
-    @storage.DeleteAttributes(args)
+    @store.DeleteAttributes(args)
     
     @domain.items.count.should == 0
   end
