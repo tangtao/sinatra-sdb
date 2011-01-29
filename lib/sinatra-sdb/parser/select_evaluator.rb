@@ -220,7 +220,6 @@ module SDB
 
     end
   
-    # Apply the given comparison params to every item in the domain
     def do_comparison(item_action, op, constant)
       results = Set.new
       @storage.all_items.each do |item|

@@ -8,9 +8,9 @@ module SDB
         end
   
         def FindSecretByAccessKey(key)
-          key = @storge.find_secret(key)
-          raise Error::AuthMissingFailure.new if key.blank?
-          key
+          secret = @storge.find_secret(key)
+          raise Error::AuthMissingFailure.new if secret.blank?
+          secret
         end
   
         def CreateDomain(args)
@@ -87,19 +87,13 @@ module SDB
         end
   
         def Query(args)#(key, domainName, queryExpression)
-          u = findUserByAccessKey(args[:key])
-          d = u.domains.find_by_name(args[:domainName])
-  
-          items,count = @query_executor.do_query(args[:queryExpression], d)
+          items,count = @query_executor.do_query(args[:key],args[:domainName],args[:queryExpression])
           items.map{|i|i.name}
         end
   
         def QueryWithAttributes(args)#(key, domainName, queryExpression)
-          u = findUserByAccessKey(args[:key])
-          d = u.domains.find_by_name(args[:domainName])
           attr_names = args[:attributeNames]
-  
-          items,count = @query_executor.do_query(args[:queryExpression], d)
+          items,count = @query_executor.do_query(args[:key],args[:domainName],args[:queryExpression])
           result = []
           items.each do |item|
             result << [item.name, getAttributesByNames(item, attr_names)]
@@ -108,7 +102,6 @@ module SDB
         end
   
         def Select(args)#(key, queryExpression)
-          #u = findUserByAccessKey(args[:key])
           @select_executor.do_query(args[:selectExpression], args[:key])
         end
   

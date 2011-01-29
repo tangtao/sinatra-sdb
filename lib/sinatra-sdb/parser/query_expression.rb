@@ -11,7 +11,7 @@ module SDB
     end
   
     # Execute the query
-    def do_query(query, domain, max = 100, token = 0)
+    def do_query(key, domain_name, query, max = 100, token = 0)
       parse_result = @parser.parse(@lexer.lex(query))
       token = 0 if token.nil?
       
@@ -22,7 +22,7 @@ module SDB
           raise parse_error_message(parse_result.unexpected_token, query) 
       end
   
-      items = QueryEvaluator.new(domain).evaluate(parse_result)
+      items = QueryEvaluator.new(key,domain_name).evaluate(parse_result)
       results = []
       count = 0
       items.each do |item|
@@ -63,11 +63,8 @@ module SDB
     
     for_symbol('attribute_comparison') do
       single_comparison    %w| identifier comp_op constant |
-      not_comparison       %w| not identifier comp_op constant |
       and_comparison       %w| identifier comp_op constant and attribute_comparison |
-      not_and_comparison   %w| not identifier comp_op constant and attribute_comparison |
       or_comparison        %w| identifier comp_op constant or attribute_comparison |
-      not_or_comparison    %w| not identifier comp_op constant or attribute_comparison |
     end
     
     for_symbol('comp_op') do
@@ -129,10 +126,11 @@ module SDB
   class QueryEvaluator < Dhaka::Evaluator
     self.grammar = QueryGrammar
     
-    def initialize(domain = nil)
-      @domain = domain
-      @predicate_identifier = nil
-      @all_items = nil
+    def initialize(key,domain_name)
+      @storage = Storage::SelectSQL.new(key)
+      @storage.domain = domain_name
+      user = User.find_by_key(key)
+      @domain = user.domains.find_by_name(domain_name)
     end
     
     define_evaluation_rules do
@@ -175,28 +173,14 @@ module SDB
         do_comparison(evaluate(child_nodes[0]), evaluate(child_nodes[1]), evaluate(child_nodes[2]))
       end
       
-      for_not_comparison do
-        do_comparison(evaluate(child_nodes[1]), evaluate(child_nodes[2]), evaluate(child_nodes[3]), true)
-      end
-      
       for_and_comparison do
         results = do_comparison(evaluate(child_nodes[0]), evaluate(child_nodes[1]), evaluate(child_nodes[2]))
         results.intersection(evaluate(child_nodes[4]))
       end
       
-      for_not_and_comparison do
-        results = do_comparison(evaluate(child_nodes[1]), evaluate(child_nodes[2]), evaluate(child_nodes[3]), true)
-        results.intersection(evaluate(child_nodes[5]))
-      end
-      
       for_or_comparison do
         results = do_comparison(evaluate(child_nodes[0]), evaluate(child_nodes[1]), evaluate(child_nodes[2]))
         results.union(evaluate(child_nodes[4]))
-      end
-      
-      for_not_or_comparison do
-        results = do_comparison(evaluate(child_nodes[1]), evaluate(child_nodes[2]), evaluate(child_nodes[3]), true)
-        results.union(evaluate(child_nodes[5]))
       end
       
       for_equal { lambda { |v1, v2| v1 == v2 } }
@@ -217,30 +201,23 @@ module SDB
     end
   
     def all_items
-      unless @all_items
-        @all_items = @domain.items.each { |k| k.name }.to_set
-      end
-      
-      return @all_items
+      @storage.all_items.to_set
     end
   
     # Apply the given comparison params to every item in the domain
-    def do_comparison(identifier, op, constant, negate = false)  
+    def do_comparison(identifier, op, constant)
       results = Set.new
       
-      if @domain
-        @domain.items.each do |item|
-          attrs = item.attrs.find_all_by_name(identifier)
-          attrs.each do |attr|
-            match = op.call(constant, attr.content)
-            if (match && !negate) || (negate && !match)
-              results << item
-              break
-            end
+      all_items.each do |item|
+        attrs = @storage.find_all_attr_by_name(item, identifier)
+        attrs.each do |attr|
+          match = op.call(constant, attr.content)
+          if match
+            results << item
+            break
           end
         end
       end
-      
       results
     end
   end
