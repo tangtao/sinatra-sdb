@@ -70,26 +70,13 @@ module SDB
       items,count = @query_executor.do_query(args[:key],args[:domainName],args[:queryExpression])
       result = []
       items.each do |item|
-        result << [item.name, getAttributesByNames(item, attr_names)]
+        result << [item.name, item.attrs_with_names(attr_names)]
       end
       result
     end
 
     def Select(args)#(key, queryExpression)
       @select_executor.do_query(args[:selectExpression], args[:key])
-    end
-
-    
-    private
-
-    def getAttributesByNames(item, attr_names)
-      result = []
-      item.attrs.each do |a|
-        if attr_names.include?(a.name)
-          result << {:name => a.name, :value => a.content}
-        end
-      end
-      result
     end
     
   end
