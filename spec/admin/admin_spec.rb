@@ -8,10 +8,12 @@ describe "AdminApplication" do
 
   before(:all) do
     dbclean()
-    @attr1 = Attr.make!
-    @item1 = @attr1.item
-    @domain = @item1.domain
-    @user = @domain.user
+
+    @user = User.make!
+    @domain = Domain.make!(:user => @user)
+    @item1  = Item.make!(:domain => @domain)
+    @attr1 = Attr.make!(:item => @item1)
+    
     @sdb = getSdb(@user)
   end
 

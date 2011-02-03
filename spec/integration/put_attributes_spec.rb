@@ -4,9 +4,10 @@ describe "PutAttributes Action" do
   
   before(:each) do
     dbclean()
-    @item = Item.make!
-    @domain = @item.domain
-    @user = @domain.user
+
+    @user = User.make!
+    @domain = Domain.make!(:user => @user)
+    @item  = Item.make!(:domain => @domain)
     @sdb = getSdb(@user)
   end
   
@@ -89,6 +90,7 @@ describe "PutAttributes Action" do
       #pp last_response.body
 
       last_response.should be_ok
+      @item.reload
       @item.attrs.count.should == 1
       @item.attrs.map{|a|a.name}.should include(attr1.name)
       @item.attrs.map{|a|a.content}.should include(attr1x.content)

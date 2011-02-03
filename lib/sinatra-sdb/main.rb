@@ -7,11 +7,12 @@ module SDB
     disable :raise_errors, :show_exceptions
     set :environment, SDB_ENV.to_sym
     set :public, PUBLIC_PATH
-    set :myaction, Action.new(XmlRender.new, Storage::Store.new(Storage::SQL.new))
+    set :myaction, Action.new(XmlRender.new, Storage::Store.new(Storage::Mongo.new))
 
     configure do
-      ActiveRecord::Base.establish_connection(SDB.config[:db])
+      #ActiveRecord::Base.establish_connection(SDB.config[:db])
       #ActiveRecord::Base.logger = Logger.new(STDOUT)
+      Mongoid.database = Mongo::Connection.new('localhost', 27017).db('sdb')
     end
 
     configure(:development, :test) do

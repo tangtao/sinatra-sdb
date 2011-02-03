@@ -32,33 +32,8 @@ module SDB
         end
   
         def DomainMetadata(args)
-          u = findUserByAccessKey(args[:key])
-          d = u.domains.find_by_name(args[:domainName])
-          
-          itemCount = d.items.size
-          itemNamesSizeBytes = d.items.inject(0){|sum,item| sum + item.name.size}
-          
-          attributeNameCount = 0
-          attributeNamesSizeBytes = 0
-          d.items.each do |item|
-            attr_set = Set.new(item.attrs.map{|a| a.name})
-            attributeNameCount += attr_set.count
-            attributeNamesSizeBytes += attr_set.inject(0){|sum,a| sum + a.size}
-          end
-          
-          attributeValueCount = d.items.inject(0){|sum, item| sum + item.attrs.count}
-          attributeValuesSizeBytes = d.items.inject(0) do |sum, item|
-              sum + item.attrs.inject(0){|a_sum,a| a_sum + a.content.size}
-          end
-          
-          r = {"ItemCount" => itemCount,
-               "ItemNamesSizeBytes" => itemNamesSizeBytes,
-               "AttributeNameCount" => attributeNameCount,
-               "AttributeNamesSizeBytes" => attributeNamesSizeBytes,
-               "AttributeValueCount" => attributeValueCount,
-               "AttributeValuesSizeBytes" => attributeValuesSizeBytes,
-               "Timestamp" => 1225486466
-              }
+          raise Error::NoSuchDomain.new if @storge.find_domain_by_name(args[:key],args[:domainName]).blank?
+          @storge.domain_metadata(args[:key],args[:domainName])
         end
   
         def GetAttributes(args)

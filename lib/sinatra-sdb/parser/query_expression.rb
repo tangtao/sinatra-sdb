@@ -127,10 +127,10 @@ module SDB
     self.grammar = QueryGrammar
     
     def initialize(key,domain_name)
-      @storage = Storage::SelectSQL.new(key)
+      @storage = Storage::SelectMongo.new(key)
       @storage.domain = domain_name
-      user = User.find_by_key(key)
-      @domain = user.domains.find_by_name(domain_name)
+      user = User.by_key(key)
+      @domain = Domain.by_name(user, domain_name)
     end
     
     define_evaluation_rules do

@@ -4,10 +4,11 @@ describe "Select Action" do
   
   before(:all) do
     dbclean()
-    @attr1 = Attr.make!
-    @item = @attr1.item
-    @domain = @item.domain
-    @user = @domain.user
+
+    @user = User.make!
+    @domain = Domain.make!(:user => @user)
+    @item  = Item.make!(:domain => @domain)
+    @attr1 = Attr.make!(:item => @item)
     @sdb = getSdb(@user)
   end
   

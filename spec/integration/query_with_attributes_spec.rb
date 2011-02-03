@@ -8,11 +8,11 @@ describe "QueryWithAttributes Action" do
   
   describe "All" do
     
-    it "Single query without AttributeName Success" do
-      attr1 = Attr.make!
-      item = attr1.item
-      domain = item.domain
-      user = domain.user
+    it "Single query without AttributeName" do
+      user = User.make!
+      domain = Domain.make!(:user => user)
+      item  = Item.make!(:domain => domain)
+      attr1 = Attr.make!(:item => item)
       sdb = getSdb(user)
       query_expression = "['#{attr1.name}'='#{attr1.content}']"
       link = sdb.query_with_attributes_link(domain.name, [], query_expression)
@@ -23,12 +23,12 @@ describe "QueryWithAttributes Action" do
       checkResponse(last_response.body, 'ItemName').should == [item.name]
     end
 
-    it "Single query with AttributeName Success" do
-      attr1 = Attr.make!
-      item = attr1.item
+    it "Single query with AttributeName" do
+      user = User.make!
+      domain = Domain.make!(:user => user)
+      item  = Item.make!(:domain => domain)
+      attr1 = Attr.make!(:item => item)
       attr2 = Attr.make!(:item => item)
-      domain = item.domain
-      user = domain.user
       sdb = getSdb(user)
       query_expression = "['#{attr1.name}'='#{attr1.content}']"
       attr_names = [attr1.name]

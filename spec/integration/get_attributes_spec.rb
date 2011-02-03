@@ -4,11 +4,12 @@ describe "GetAttributes Action" do
   
   before(:all) do
     dbclean()
-    @attr1 = Attr.make!
-    @item = @attr1.item
+    @user = User.make!
+    @domain = Domain.make!(:user => @user)
+    @item = Item.make!(:domain => @domain)
+    
+    @attr1 = Attr.make!(:item => @item)
     @attr2  = Attr.make!(:item => @item)
-    @domain = @item.domain
-    @user = @domain.user
     @sdb = getSdb(@user)
   end
   

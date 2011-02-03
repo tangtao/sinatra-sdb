@@ -1,4 +1,5 @@
 require 'spork'
+require "#{File.dirname(__FILE__)}/data_maker_helper"
 
 module SDB
   module SpecHelpers
@@ -6,6 +7,10 @@ module SDB
     protected
     def app
       @app ||= SDB::MainApplication
+    end
+
+    def db
+      @db ||= SDB::DataMaker.new
     end
 
     def getSdb(user)
@@ -22,7 +27,8 @@ module SDB
     end
 
     def dbclean
-      DatabaseCleaner.clean
+      #DatabaseCleaner.clean
+      ::Mongoid.master.collections.each { |c| c.remove }
     end
 
   end
@@ -30,13 +36,15 @@ end
 
 Spork.prefork do
   ENV['SDB_ENV'] = 'test'
+
   require File.join(File.dirname(__FILE__), '..', 'lib', 'sinatra-sdb.rb')
   require 'rack/test'
   #require 'spec/autorun'
   #require 'spec/interop/test'
-  require 'database_cleaner'
+  #require 'database_cleaner'
   require 'support/blueprints'
-  Dir["#{File.dirname(__FILE__)}/ext/*.rb"].each {|r| require r }
+  curr_dir = File.dirname(__FILE__)
+  %w(right_sdb_interface_ext).each {|r| require "#{curr_dir}/ext/#{r}"}
   
   # set test environment
   set :environment, :test
@@ -51,7 +59,7 @@ Spork.prefork do
   
     config.before(:suite) do
       #DatabaseCleaner.strategy = :transaction
-      DatabaseCleaner.strategy = :truncation
+      #DatabaseCleaner.strategy = :truncation
       #DatabaseCleaner.clean_with(:truncation)
     end
   

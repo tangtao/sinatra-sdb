@@ -8,11 +8,12 @@ describe "Select Executor Test" do
     dbclean()
     @selexecutor = SDB::SelectExecutor.new
     
-    @attr1_1 = Attr.make!
-    @item1 = @attr1_1.item
-    @attr1_Y  = Attr.make!(:item => @item1,:name => 'year', :content => '2009')
-    @domain = @item1.domain
-    @user = @domain.user
+    @user = User.make!
+    @domain = Domain.make!(:user => @user)
+    
+    @item1  = Item.make!(:domain => @domain)
+    @attr1_1 = Attr.make!(:item => @item1)
+    @attr1_Y = Attr.make!(:item => @item1,:name => 'year', :content => '2009')
 
     @item2  = Item.make!(:domain => @domain)
     @attr2_1  = Attr.make!(:item => @item2)

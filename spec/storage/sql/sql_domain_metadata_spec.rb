@@ -3,17 +3,17 @@ require File.expand_path(File.dirname(__FILE__) + '/../../spec_helper')
 describe "DomainMetadata Storage" do
   
   before(:all) do
-    @storage = SDB::Storage::SQL.new
+    @store = SDB::Storage::Store.new(SDB::Storage::Mongo.new)
   end
 
   before(:each) do
     dbclean()
-  
-    @attr1_1 = Attr.make!
-    @item1 = @attr1_1.item
-    @domain = @item1.domain
-    @user = @domain.user
 
+    @user = User.make!
+    @domain = Domain.make!(:user => @user)
+    @item1  = Item.make!(:domain => @domain)
+  
+    @attr1_1 = Attr.make!(:item => @item1)
     @attr1_2  = Attr.make!(:item => @item1)
     @attr1_2x  = Attr.make!(:item => @item1, :name => @attr1_2.name)
   end
@@ -23,7 +23,7 @@ describe "DomainMetadata Storage" do
             :domainName => @domain.name
            }
     
-    r = @storage.DomainMetadata(args)
+    r = @store.DomainMetadata(args)
     
     r["ItemCount"].should == 1
     r["ItemNamesSizeBytes"].should == @item1.name.size

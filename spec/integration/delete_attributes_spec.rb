@@ -9,13 +9,11 @@ describe "DeleteAttributes Action" do
   describe "All" do
     
     it "Delete Success" do
-      attr1 = Attr.make!
-      item = attr1.item
-      domain = item.domain
-      user = domain.user
-      
+      user = User.make!
+      domain = Domain.make!(:user => user)
+      item  = Item.make!(:domain => domain)
+      attr1 = Attr.make!(:item => item)
       item.attrs.count.should == 1
-      
       sdb = getSdb(user)
       
       attrs = { attr1.name => attr1.content }

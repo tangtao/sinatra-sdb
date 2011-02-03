@@ -4,7 +4,7 @@ describe "Create Domains Storage" do
   
   before(:all) do
     dbclean()
-    @store = SDB::Storage::Store.new(SDB::Storage::SQL.new)
+    @store = SDB::Storage::Store.new(SDB::Storage::Mongo.new)
     @user = User.make!
   end
     

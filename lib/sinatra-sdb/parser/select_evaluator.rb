@@ -6,7 +6,7 @@ module SDB
     self.grammar = SelectGrammar
     
     def initialize(key)
-      @storage = Storage::SelectSQL.new(key)
+      @storage = Storage::SelectMongo.new(key)
     end
     
     define_evaluation_rules do
