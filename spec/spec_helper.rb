@@ -13,6 +13,10 @@ module SDB
       @db ||= SDB::DataMaker.new
     end
 
+    def getStore
+      SDB::Store.new(SDB::Storage::Mongo.new)
+    end
+
     def getSdb(user)
       logger = Logger.new('/dev/null')
       params = {:server => 'example.org', :logger => logger}

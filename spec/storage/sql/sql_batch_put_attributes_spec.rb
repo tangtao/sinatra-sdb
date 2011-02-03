@@ -3,7 +3,7 @@ require File.expand_path(File.dirname(__FILE__) + '/../../spec_helper')
 describe "BatchPutAttributes Storage" do
   
   before(:all) do
-    @store = SDB::Storage::Store.new(SDB::Storage::Mongo.new)
+    @store = getStore
   end
 
   before(:each) do

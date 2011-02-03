@@ -4,7 +4,7 @@ describe "Delete Domain Storage" do
   
   before(:all) do
     dbclean()
-    @store = SDB::Storage::Store.new(SDB::Storage::Mongo.new)
+    @store = getStore
     @user = User.make!
     @domains = (0..3).map{Domain.make!(:user => @user)}
   end
