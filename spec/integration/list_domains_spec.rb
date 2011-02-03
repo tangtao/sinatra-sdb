@@ -4,7 +4,6 @@ describe "ListDomains Action" do
   
   before(:all) do
     dbclean()
-    @storage = SDB::Storage::SQL.new
     @user = User.make!
     @domains = (0..9).map{Domain.make!(:user => @user)}
     @sdb = getSdb(@user)

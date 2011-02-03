@@ -14,7 +14,7 @@ module SDB
     end
 
     def getStore
-      SDB::Store.new(SDB::Storage::Mongo.new)
+      SDB::Store.new(SDB::Storage::Default.new)
     end
 
     def getSdb(user)

@@ -1,6 +1,6 @@
 module SDB
   module Storage
-    class Mongo
+    class Default
         def initialize()
         end
   
@@ -127,7 +127,7 @@ module SDB
       
     end
 
-    class SelectMongo
+    class SelectDefault
       
         attr_writer :sort_name, :sort_order, :limit_number, :explicit_attr_names
       

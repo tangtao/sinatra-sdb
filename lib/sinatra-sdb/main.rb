@@ -7,7 +7,7 @@ module SDB
     disable :raise_errors, :show_exceptions
     set :environment, SDB_ENV.to_sym
     set :public, PUBLIC_PATH
-    set :myaction, Action.new(XmlRender.new, Store.new(Storage::Mongo.new))
+    set :myaction, Action.new(XmlRender.new, Store.new(Storage::Default.new))
 
     configure do
       case SDB.config[:store_type]

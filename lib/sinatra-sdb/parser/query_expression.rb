@@ -127,7 +127,7 @@ module SDB
     self.grammar = QueryGrammar
     
     def initialize(key,domain_name)
-      @storage = Storage::SelectMongo.new(key)
+      @storage = Storage::SelectDefault.new(key)
       @storage.domain = domain_name
       user = User.by_key(key)
       @domain = Domain.by_name(user, domain_name)

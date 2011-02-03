@@ -15,7 +15,7 @@ module SDB
     set :views, File.dirname(__FILE__) + '/views'
     enable :sessions
     register Sinatra::Flash
-    set :storage, Storage::SQL.new
+    set :storage, Storage::Default.new
 
     before do
       ActiveRecord::Base.verify_active_connections!
