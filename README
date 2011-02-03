@@ -9,6 +9,7 @@ sinatra-sdb is an implementation of Amazon's SimpleDB REST API.
   
 * Implements the current 2007-11-07 and 2009-04-15 SimpleDB REST API versions.
 * Support multi-Database (by ActiveRecord).
+* Support MongoDB (by Mongoid).
 
 
 == INSTALL:
