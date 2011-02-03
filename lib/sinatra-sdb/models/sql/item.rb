@@ -10,5 +10,9 @@ class Item < ActiveRecord::Base
       end
       result
     end
+
+  def self.by_name(domain, name)
+    Item.find(:first, :conditions => { :domain_id => domain.id, :name => name })
+  end
     
 end

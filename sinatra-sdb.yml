@@ -1,14 +1,17 @@
 :development:
+  :store_type: mongo
   :db:
     :database: db/development.sqlite
     :adapter: sqlite3
 
 :test:
+  :store_type: mongo
   :db:
     :database: db/test.sqlite
     :adapter: sqlite3
 
 :production:
+  :store_type: mongo
   :db:
     :database: db/production.sqlite
     :adapter: sqlite3

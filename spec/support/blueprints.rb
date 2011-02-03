@@ -1,7 +1,3 @@
-#require 'machinist/active_record'
-#require 'machinist'
-#require 'machinist/mongoid'
-
 User.blueprint do
   email { "tom#{sn}@email.com" }
   password {"pass"}

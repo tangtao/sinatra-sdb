@@ -31,8 +31,12 @@ module SDB
     end
 
     def dbclean
-      #DatabaseCleaner.clean
-      ::Mongoid.master.collections.each { |c| c.remove }
+      case SDB.config[:store_type]
+      when "sql"
+        DatabaseCleaner.clean
+      when "mongo"
+        ::Mongoid.master.collections.each { |c| c.remove }
+      end
     end
 
   end
@@ -45,10 +49,11 @@ Spork.prefork do
   require 'rack/test'
   #require 'spec/autorun'
   #require 'spec/interop/test'
-  #require 'database_cleaner'
+  require 'database_cleaner'
+  require 'machinist/active_record'
   require 'support/blueprints'
   curr_dir = File.dirname(__FILE__)
-  %w(right_sdb_interface_ext).each {|r| require "#{curr_dir}/ext/#{r}"}
+  %w(right_sdb_interface_ext database_cleaner_activerecord_base_ext).each {|r| require "#{curr_dir}/ext/#{r}"}
   
   # set test environment
   set :environment, :test
@@ -62,19 +67,14 @@ Spork.prefork do
     config.include SDB::SpecHelpers
   
     config.before(:suite) do
-      #DatabaseCleaner.strategy = :transaction
-      #DatabaseCleaner.strategy = :truncation
-      #DatabaseCleaner.clean_with(:truncation)
+      case SDB.config[:store_type]
+      when "sql"
+        DatabaseCleaner.strategy = :truncation
+      when "mongo"
+        #do nothing
+      end
     end
   
-    config.before(:each) do
-      #DatabaseCleaner.start
-      #Machinist.reset_before_test
-    end
-  
-    config.after(:each) do
-      #DatabaseCleaner.clean
-    end
   end
 
 end

@@ -10,9 +10,13 @@ module SDB
     set :myaction, Action.new(XmlRender.new, Store.new(Storage::Mongo.new))
 
     configure do
-      #ActiveRecord::Base.establish_connection(SDB.config[:db])
-      #ActiveRecord::Base.logger = Logger.new(STDOUT)
-      Mongoid.database = Mongo::Connection.new('localhost', 27017).db('sdb')
+      case SDB.config[:store_type]
+      when "sql"
+        ActiveRecord::Base.establish_connection(SDB.config[:db])
+        #ActiveRecord::Base.logger = Logger.new(STDOUT)
+      when "mongo"
+        Mongoid.database = Mongo::Connection.new('localhost', 27017).db('sdb')
+      end
     end
 
     configure(:development, :test) do

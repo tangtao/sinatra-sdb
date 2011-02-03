@@ -11,8 +11,12 @@ class User < ActiveRecord::Base
   validate  :password_must_be_present
 
   before_create  :generate_secret_and_key
+
+  def self.by_key(key)
+    User.find(:first, :conditions => { :key => key })
+  end
   
-  def User.authenticate(email, password)
+  def self.authenticate(email, password)
     if user = find_by_email(email)
       if user.hashed_password == encrypt_password(password, user.salt)
         user
@@ -20,7 +24,7 @@ class User < ActiveRecord::Base
     end
   end
 
-  def User.encrypt_password(password, salt)
+  def self.encrypt_password(password, salt)
     Digest::SHA2.hexdigest(password + "zzz" + salt)
   end
   
