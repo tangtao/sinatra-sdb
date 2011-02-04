@@ -34,6 +34,6 @@ curr_dir = File.dirname(__FILE__)
 %w(base_executor query_expression select_parser select_evaluator select_executor).each {|r| require "#{curr_dir}/parser/#{r}"}
 %w(default).each {|r| require "#{curr_dir}/storage/#{r}"}
 %w(mongoid errors helpers xmlrender param_builder param_check store action main).each {|r| require "#{curr_dir}/#{r}"}
+%w(attr item domain user).each {|r| require "#{curr_dir}/models/common/#{r}"}
 %w(attr item domain user).each {|r| require "#{curr_dir}/models/#{SDB.config[:store_type]}/#{r}"}
-#%w(attr item domain user).each {|r| require "#{curr_dir}/models/mongo/#{r}"}
 %w(helpers admin).each {|r| require "#{curr_dir}/admin/#{r}"}
