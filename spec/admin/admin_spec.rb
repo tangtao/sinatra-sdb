@@ -30,11 +30,18 @@ describe "AdminApplication" do
       last_request.path.should == '/admin/login'
     end
 
-    it "post /admin/login" do
+    it "post /admin/login success" do
       post "/admin/login", {:email => @user.email, :password => 'pass'}
       follow_redirect!
       last_response.should be_ok
       last_request.path.should == '/admin/home'
+    end
+
+    it "post /admin/login fail" do
+      post "/admin/login", {:email => @user.email, :password => 'error_pass'}
+      follow_redirect!
+      last_response.should be_ok
+      last_request.path.should == '/admin/login'
     end
 
 end

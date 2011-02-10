@@ -18,7 +18,7 @@ module SDB
     set :storage, Storage::Default.new
 
     before do
-      ActiveRecord::Base.verify_active_connections!
+      #ActiveRecord::Base.verify_active_connections!
     end
     configure(:development, :test) do
       register Sinatra::Reloader
@@ -55,8 +55,7 @@ module SDB
     get '/admin/home' do
       login_required
       @user = curr_user
-      @domains = @user.domains.map {|d| [d.name, settings.storage.DomainMetadata(
-                                                :key => curr_user.key, :domainName => d.name)]}
+      @domains = @user.domains.map {|d| [d.name, settings.storage.domain_metadata(curr_user.key, d.name)]}
       r :home, "Home"
     end
 
