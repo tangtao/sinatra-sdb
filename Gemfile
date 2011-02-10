@@ -25,5 +25,5 @@ group :test do
   #gem 'machinist_mongo', :git => 'git://github.com/nmerouze/machinist_mongo.git', :require => 'machinist/mongoid', :branch => 'machinist2'
   #gem 'machinist_mongo', :require => 'machinist/mongoid', :path => File.join(File.dirname(__FILE__), '..', 'lib', 'machinist_mongo')
   gem 'database_cleaner'
-  gem 'spork'
+  gem 'spork', '0.9.0.rc2'
 end
